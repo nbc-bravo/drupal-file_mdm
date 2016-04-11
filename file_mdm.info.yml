@@ -1,0 +1,5 @@
+type: module
+core: 8.x
+name: file_mdm
+description: 'Provides a service to manage file metadata (for example, EXIF image information).'
+configure: file_mdm.settings
