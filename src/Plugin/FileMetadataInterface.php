@@ -11,6 +11,16 @@ use Drupal\Component\Plugin\PluginInspectionInterface;
 interface FileMetadataInterface extends ContainerFactoryPluginInterface, PluginInspectionInterface {
 
   /**
+   * Sets the URI of the file.
+   *
+   * @param string $path
+   *   A URI.
+   *
+   * @return $this
+   */
+  public function setUri($uri);
+
+  /**
    * Gets the local filesystem path to the file.
    *
    * @return string
@@ -31,6 +41,6 @@ interface FileMetadataInterface extends ContainerFactoryPluginInterface, PluginI
   /**
    * @todo
    */
-  public function getFromUri($uri);
+  public function getMetadataFromUri();
 
 }

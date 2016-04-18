@@ -33,6 +33,13 @@ class Exif extends PluginBase implements FileMetadataInterface {
   protected $fileSystem;
 
   /**
+   * The URI of the file.
+   *
+   * @var string
+   */
+  protected $uri = '';
+
+  /**
    * The local filesystem path to the file.
    *
    * This is used to allow accessing local copies of files stored remotely, to
@@ -42,6 +49,13 @@ class Exif extends PluginBase implements FileMetadataInterface {
    * @var string
    */
   protected $localPath = '';
+
+  /**
+   * The metadata of the file.
+   *
+   * @var mixed
+   */
+  protected $metadata;
 
   /**
    * Constructs an ImagemagickToolkit object.
@@ -94,8 +108,19 @@ class Exif extends PluginBase implements FileMetadataInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFromUri($uri) {
-    $path = $this->getLocalPath() ?: $this->fileSystem->realpath($uri);
+  public function setUri($uri) {
+    $this->uri = $uri;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMetadataFromUri() {
+    if ($this->metadata) {
+      return $this->metadata;
+    }
+    $path = $this->getLocalPath() ?: $this->fileSystem->realpath($this->uri);
     if (!file_exists($path)) {
       // File does not exists.
       return NULL;
@@ -110,8 +135,8 @@ class Exif extends PluginBase implements FileMetadataInterface {
       //$this->logger->error('@todo.');
       return NULL;
     }
-    if ($exif_data = @exif_read_data($path)) {
-      return $exif_data;
+    if ($this->metadata = @exif_read_data($path)) {
+      return $this->metadata;
     }
     else {
       // No data or read error.

@@ -35,6 +35,8 @@ class FileMetadataManager { // @todo implements
    */
   protected $configFactory;
 
+  protected $files = [];
+
   /**
    * Constructs a FileMetadataManager object.
    *
@@ -54,9 +56,32 @@ class FileMetadataManager { // @todo implements
   /**
    * @todo
    */
-  public function manage($plugin_id, $uri) {
-    $plugin = $this->pluginManager->createInstance($plugin_id);
-    return $plugin->getFromUri($uri);
+  public function getFileHandle($uri) {
+    if (file_exists($uri)) {
+      $handle = hash('sha256', $uri);
+      if (!isset($this->files[$handle])) {
+        $this->files[$handle] = ['uri' => $uri];
+      }
+      return $handle;
+    }
+    return NULL;
+  }
+
+  protected function getFileMetadataPlugin($handle, $metadata_id) {
+    if (!isset($this->files[$handle])) {
+      throw new \RuntimeException('File entry not initialised');
+    }
+    if (!isset($this->files[$handle]['plugins'][$metadata_id])) {
+      $this->files[$handle]['plugins'][$metadata_id] = $this->pluginManager->createInstance($metadata_id);
+      $this->files[$handle]['plugins'][$metadata_id]->setUri($this->files[$handle]['uri']);
+    }
+    return $this->files[$handle]['plugins'][$metadata_id];
+  }
+
+  public function getFileMetadataFromFile($handle, $metadata_id) {
+    $plugin = $this->getFileMetadataPlugin($handle, $metadata_id);
+    $metadata = $plugin->getMetadataFromUri();
+    return $metadata;
   }
 
 }
