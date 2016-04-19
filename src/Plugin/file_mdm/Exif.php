@@ -93,13 +93,6 @@ class Exif extends PluginBase implements FileMetadataInterface {
   /**
    * {@inheritdoc}
    */
-  public function getLocalPath() {
-    return $this->localPath;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function setLocalPath($path) {
     $this->localPath = $path;
     return $this;
@@ -116,11 +109,20 @@ class Exif extends PluginBase implements FileMetadataInterface {
   /**
    * {@inheritdoc}
    */
-  public function getMetadataFromUri() {
+  public function getMetadata($key = NULL) {
     if ($this->metadata) {
-      return $this->metadata;
+      return $key ? (isset($this->metadata[$key]) ? $this->metadata[$key] : NULL) : $this->metadata;
     }
-    $path = $this->getLocalPath() ?: $this->fileSystem->realpath($this->uri);
+    else {
+      return $this->getMetadataFromFile($key);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMetadataFromFile($key = NULL) {
+    $path = $this->localPath ?: $this->fileSystem->realpath($this->uri);
     if (!file_exists($path)) {
       // File does not exists.
       return NULL;
@@ -136,7 +138,7 @@ class Exif extends PluginBase implements FileMetadataInterface {
       return NULL;
     }
     if ($this->metadata = @exif_read_data($path)) {
-      return $this->metadata;
+      return $key ? (isset($this->metadata[$key]) ? $this->metadata[$key] : NULL) : $this->metadata;
     }
     else {
       // No data or read error.

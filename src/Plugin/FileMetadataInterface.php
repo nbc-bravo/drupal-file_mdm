@@ -21,14 +21,6 @@ interface FileMetadataInterface extends ContainerFactoryPluginInterface, PluginI
   public function setUri($uri);
 
   /**
-   * Gets the local filesystem path to the file.
-   *
-   * @return string
-   *   A filesystem path.
-   */
-  public function getLocalPath();
-
-  /**
    * Sets the local filesystem path to the file.
    *
    * @param string $path
@@ -41,6 +33,7 @@ interface FileMetadataInterface extends ContainerFactoryPluginInterface, PluginI
   /**
    * @todo
    */
-  public function getMetadataFromUri();
+  public function getMetadata();
+  public function getMetadataFromFile();
 
 }
