@@ -56,32 +56,12 @@ class FileMetadataManager { // @todo implements
   /**
    * @todo
    */
-  public function setFile($uri) {
-    if (file_exists($uri)) {
-      $file_hash = hash('sha256', $uri);
-      if (!isset($this->files[$file_hash])) {
-        $this->files[$file_hash] = ['uri' => $uri];
-      }
-      return $file_hash;
-    }
-    return NULL;
-  }
-
-  protected function getFileMetadataPlugin($file_hash, $metadata_id) {
-    if (!isset($this->files[$file_hash]['plugins'][$metadata_id])) {
-      $this->files[$file_hash]['plugins'][$metadata_id] = $this->pluginManager->createInstance($metadata_id);
-      $this->files[$file_hash]['plugins'][$metadata_id]->setUri($this->files[$file_hash]['uri']);
-    }
-    return $this->files[$file_hash]['plugins'][$metadata_id];
-  }
-
-  public function getMetadata($file_hash, $metadata_id, $key = NULL) {
+  public function getFile($uri) {
+    $file_hash = hash('sha256', $uri);
     if (!isset($this->files[$file_hash])) {
-      throw new \RuntimeException('File entry not initialised');
+      $this->files[$file_hash] = new FileMetadata($this->pluginManager, $uri);
     }
-    $plugin = $this->getFileMetadataPlugin($file_hash, $metadata_id, $key);
-    $metadata = $plugin->getMetadata($key);
-    return $metadata;
+    return $this->files[$file_hash];
   }
 
 }
