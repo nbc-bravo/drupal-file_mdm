@@ -16,7 +16,7 @@ A file metadata manager service taking cues from discussions at [#2630242 Provid
 
 ```php
   $fmdm = \Drupal::service('file_metadata_manager');
-  $file_metadata = $fmdm->useUri(drupal_get_path('module', 'image_effects') . '/tests/images/portrait-painting.jpg');
+  $file_metadata = $fmdm->useUri(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg');
   $make = $file_metadata->getMetadata('exif', 'Make');
   $model = $file_metadata->getMetadata('exif', 'Model');
   return ['#markup' => 'make: ' . $make . ' - model: ' . $model];
