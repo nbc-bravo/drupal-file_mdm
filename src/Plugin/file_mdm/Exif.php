@@ -3,8 +3,6 @@
 namespace Drupal\file_mdm\Plugin\file_mdm;
 
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\Plugin\PluginBase;
-use Drupal\file_mdm\Plugin\FileMetadataPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 
@@ -16,7 +14,7 @@ use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
  *   help = @Translation("FileMetadata plugin for EXIF."),
  * )
  */
-class Exif extends PluginBase implements FileMetadataPluginInterface {
+class Exif extends FileMetadataPluginBase {
 
   /**
    * The MIME type guessing service.
@@ -24,38 +22,6 @@ class Exif extends PluginBase implements FileMetadataPluginInterface {
    * @var \Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface
    */
   protected $mimeTypeGuesser;
-
-  /**
-   * The file system service.
-   *
-   * @var \Drupal\Core\File\FileSystemInterface
-   */
-  protected $fileSystem;
-
-  /**
-   * The URI of the file.
-   *
-   * @var string
-   */
-  protected $uri = '';
-
-  /**
-   * The local filesystem path to the file.
-   *
-   * This is used to allow accessing local copies of files stored remotely, to
-   * minimise remote calls and allow functions that cannot access remote stream
-   * wrappers to operate locally.
-   *
-   * @var string
-   */
-  protected $localPath = '';
-
-  /**
-   * The metadata of the file.
-   *
-   * @var mixed
-   */
-  protected $metadata;
 
   /**
    * Constructs an Exif file metadata plugin.
@@ -71,10 +37,9 @@ class Exif extends PluginBase implements FileMetadataPluginInterface {
    * @param \Drupal\Core\File\FileSystemInterface $file_system
    *   The file system service.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, MimeTypeGuesserInterface $mime_type_guesser, FileSystemInterface $file_system) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileSystemInterface $file_system, MimeTypeGuesserInterface $mime_type_guesser) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $file_system);
     $this->mimeTypeGuesser = $mime_type_guesser;
-    $this->fileSystem = $file_system;
   }
 
   /**
@@ -85,25 +50,9 @@ class Exif extends PluginBase implements FileMetadataPluginInterface {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('file.mime_type.guesser'),
-      $container->get('file_system')
+      $container->get('file_system'),
+      $container->get('file.mime_type.guesser')
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setLocalPath($path) {
-    $this->localPath = $path;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setUri($uri) {
-    $this->uri = $uri;
-    return $this;
   }
 
   /**
