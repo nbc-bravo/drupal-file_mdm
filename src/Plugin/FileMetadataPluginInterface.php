@@ -8,7 +8,7 @@ use Drupal\Component\Plugin\PluginInspectionInterface;
 /**
  * Provides an interface defining a FileMetadata plugin.
  */
-interface FileMetadataInterface extends ContainerFactoryPluginInterface, PluginInspectionInterface {
+interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, PluginInspectionInterface {
 
   /**
    * Sets the URI of the file.

@@ -4,7 +4,7 @@ namespace Drupal\file_mdm\Plugin\file_mdm;
 
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\file_mdm\Plugin\FileMetadataInterface;
+use Drupal\file_mdm\Plugin\FileMetadataPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 
@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
  *   help = @Translation("FileMetadata plugin for EXIF."),
  * )
  */
-class Exif extends PluginBase implements FileMetadataInterface {
+class Exif extends PluginBase implements FileMetadataPluginInterface {
 
   /**
    * The MIME type guessing service.
@@ -58,7 +58,7 @@ class Exif extends PluginBase implements FileMetadataInterface {
   protected $metadata;
 
   /**
-   * Constructs an ImagemagickToolkit object.
+   * Constructs an Exif file metadata plugin.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -134,7 +134,7 @@ class Exif extends PluginBase implements FileMetadataInterface {
     }
     if (!function_exists('exif_read_data')) {
       // No PHP EXIF extension enabled.
-      //$this->logger->error('@todo.');
+      //$this->logger->error('@todo. The PHP EXIF extension is not installed. Unable to retrieve EXIF image metadata.');
       return NULL;
     }
     if ($this->metadata = @exif_read_data($path)) {

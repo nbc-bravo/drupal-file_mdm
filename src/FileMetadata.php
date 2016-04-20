@@ -16,7 +16,24 @@ class FileMetadata { // @todo implements
    */
   protected $pluginManager;
 
-  protected $uri;
+  /**
+   * The URI of the file.
+   *
+   * @var string
+   */
+  protected $uri = '';
+
+  /**
+   * The local filesystem path to the file.
+   *
+   * This is used to allow accessing local copies of files stored remotely, to
+   * minimise remote calls and allow functions that cannot access remote stream
+   * wrappers to operate locally.
+   *
+   * @var string
+   */
+  protected $localPath = '';
+
   protected $plugins = [];
 
   public function __construct(FileMetadataPluginManager $plugin_manager, $uri) {
@@ -24,14 +41,33 @@ class FileMetadata { // @todo implements
     $this->uri = $uri;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function setLocalPath($path) {
+    $this->localPath = $path;
+    foreach ($this->plugins as $plugin) {
+      $plugin->setLocalPath($this->localPath);
+    }
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function getFileMetadataPlugin($metadata_id) {
     if (!isset($this->plugins[$metadata_id])) {
       $this->plugins[$metadata_id] = $this->pluginManager->createInstance($metadata_id);
-      $this->plugins[$metadata_id]->setUri($this->uri);
+      $this->plugins[$metadata_id]
+        ->setUri($this->uri)
+        ->setLocalPath($this->localPath);
     }
     return $this->plugins[$metadata_id];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getMetadata($metadata_id, $key = NULL) {
     $plugin = $this->getFileMetadataPlugin($metadata_id);
     $metadata = $plugin->getMetadata($key);
