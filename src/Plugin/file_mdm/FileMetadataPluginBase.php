@@ -107,4 +107,12 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function setMetadata($metadata) {
+    $this->metadata = $metadata;
+    return $this;
+  }
+
 }
