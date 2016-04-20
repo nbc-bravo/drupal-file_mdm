@@ -30,25 +30,36 @@ class FileMetadataManagerTest extends WebTestBase {
     $image_files = [
       [
         'uri' => drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg',
+        'count' => 80,
         'Orientation' => 8,
         'ShutterSpeedValue' => '106/32',
       ],
       [
         'uri' => 'public://test-exif.jpeg',
+        'count' => 80,
         'Orientation' => 8,
         'ShutterSpeedValue' => '106/32',
       ],
       [
         'uri' => 'dummy-remote://test-exif.jpeg',
         'local_path' => $this->container->get('file_system')->realpath('temporary://test-exif.jpeg'),
+        'count' => 80,
         'Orientation' => 8,
         'ShutterSpeedValue' => '106/32',
       ],
       [
+        // Image with no EXIF data. Still, exif_read_data returns some info.
         'uri' => 'public://image-test.jpg',
+        'count' => 7,
+      ],
+      [
+        // PNG should not reach exif_read_data.
+        'uri' => 'public://image-test.png',
+        'count' => 0,
       ],
       [
         'uri' => NULL,
+        'count' => 0,
       ],
     ];
 
@@ -58,6 +69,7 @@ class FileMetadataManagerTest extends WebTestBase {
       if (isset($image_file['local_path'])) {
         $file_metadata->setLocalPath($image_file['local_path']);
       }
+      $this->assertEqual($image_file['count'], count($file_metadata->getMetadata('exif')));
       $this->assertIdentical(isset($image_file['Orientation']) ? $image_file['Orientation'] : NULL, $file_metadata->getMetadata('exif', 'Orientation'));
       $this->assertIdentical(isset($image_file['ShutterSpeedValue']) ? $image_file['ShutterSpeedValue'] : NULL, $file_metadata->getMetadata('exif', 'ShutterSpeedValue'));
     }

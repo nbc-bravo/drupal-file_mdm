@@ -46,6 +46,13 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   protected $metadata;
 
   /**
+   * If file at URI has been parsed for metadata.
+   *
+   * @var bool
+   */
+  protected $readFromFile = FALSE;
+
+  /**
    * Constructs an Exif file metadata plugin.
    *
    * @param array $configuration
@@ -76,8 +83,28 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function setUri($uri) {
+    // @todo manage if uri is null, it means in-memory object; if changed from existing, a file is being renamed etc.
     $this->uri = $uri;
     return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMetadata($key = NULL) {
+    if ($this->metadata) {
+      return $this->getMetadataKey($key);
+    }
+    else {
+      // Metadata has not been loaded yet. Try loading it from file if URI is
+      // defined and a read attempt was not made yet.
+      if (!empty($this->uri) && !$this->readFromFile) {
+        return $this->getMetadataFromFile($key);
+      }
+      else {
+        return NULL;
+      }
+    }
   }
 
 }

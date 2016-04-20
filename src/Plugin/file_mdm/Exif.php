@@ -58,26 +58,15 @@ class Exif extends FileMetadataPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getMetadata($key = NULL) {
-    if ($this->metadata) {
-      return $key ? (isset($this->metadata[$key]) ? $this->metadata[$key] : NULL) : $this->metadata;
-    }
-    else {
-      return $this->getMetadataFromFile($key);
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getMetadataFromFile($key = NULL) {
     $path = $this->localPath ?: $this->fileSystem->realpath($this->uri);
+    $this->readFromFile = TRUE;
     if (!file_exists($path)) {
       // File does not exists.
+      //$this->logger->error("@todo. Cannot read file at {$this->uri}. If it's a remote....");
       return NULL;
     }
-    $mime_type = $this->mimeTypeGuesser->guess($path);
-    if (!in_array($mime_type, ['image/jpeg', 'image/tiff'])) {
+    if (!in_array($this->mimeTypeGuesser->guess($path), ['image/jpeg', 'image/tiff'])) {
       // File does not support EXIF.
       return NULL;
     }
@@ -87,11 +76,23 @@ class Exif extends FileMetadataPluginBase {
       return NULL;
     }
     if ($this->metadata = @exif_read_data($path)) {
-      return $key ? (isset($this->metadata[$key]) ? $this->metadata[$key] : NULL) : $this->metadata;
+      return $this->getMetadataKey($key);
     }
     else {
       // No data or read error.
       return NULL;
+    }
+  }
+
+  /**
+   * @todo
+   */
+  protected function getMetadataKey($key = NULL) {
+    if (!$key) {
+      return $this->metadata;
+    }
+    else {
+      return isset($this->metadata[$key]) ? $this->metadata[$key] : NULL;
     }
   }
 
