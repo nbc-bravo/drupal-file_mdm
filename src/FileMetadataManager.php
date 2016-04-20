@@ -57,7 +57,11 @@ class FileMetadataManager { // @todo implements
    * @todo
    */
   public function debugDumpHashes() {
-    debug(array_keys($this->files));
+    $ret = [];
+    foreach ($this->files as $hash => $file) {
+      $ret[] = [$hash, $file->getUri(), $file->getLocalPath()];
+    }
+    debug($ret);
   }
 
   /**

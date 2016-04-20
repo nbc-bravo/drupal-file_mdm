@@ -75,7 +75,7 @@ class Exif extends FileMetadataPluginBase {
       //$this->logger->error('@todo. The PHP EXIF extension is not installed. Unable to retrieve EXIF image metadata.');
       return FALSE;
     }
-    $this->metadata = @exif_read_data($path));
+    $this->metadata = @exif_read_data($path);
     $this->hasMetadataChanged = FALSE;
     return (bool) $this->metadata;
   }

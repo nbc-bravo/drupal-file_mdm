@@ -44,6 +44,20 @@ class FileMetadata { // @todo implements
   /**
    * {@inheritdoc}
    */
+  public function getUri() {
+    return $this->uri;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLocalPath() {
+    return $this->localPath;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setLocalPath($path) {
     $this->localPath = $path;
     foreach ($this->plugins as $plugin) {

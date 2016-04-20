@@ -81,6 +81,22 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * {@inheritdoc}
    */
+  public function setUri($uri) {
+    // @todo manage if uri is null, it means in-memory object; if changed from existing, a file is being renamed etc.
+    $this->uri = $uri;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getUri() {
+    return $this->uri;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setLocalPath($path) {
     $this->localPath = $path;
     return $this;
@@ -89,10 +105,8 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * {@inheritdoc}
    */
-  public function setUri($uri) {
-    // @todo manage if uri is null, it means in-memory object; if changed from existing, a file is being renamed etc.
-    $this->uri = $uri;
-    return $this;
+  public function getLocalPath() {
+    return $this->localPath;
   }
 
   /**
