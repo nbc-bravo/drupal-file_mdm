@@ -77,10 +77,17 @@ class FileMetadata { // @todo implements
   /**
    * {@inheritdoc}
    */
-  public function setMetadata($metadata_id, $metadata) {
+  public function setMetadata($metadata_id, $key, $value) {
     $plugin = $this->getFileMetadataPlugin($metadata_id);
-    $plugin->setMetadata($metadata);
-    return $this;
+    return $plugin->setMetadata($key, $value);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function loadMetadata($metadata_id, $metadata) {
+    $plugin = $this->getFileMetadataPlugin($metadata_id);
+    return $plugin->loadMetadata($metadata);
   }
 
 }

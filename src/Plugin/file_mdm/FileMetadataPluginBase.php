@@ -46,11 +46,18 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   protected $metadata;
 
   /**
-   * If file at URI has been parsed for metadata.
+   * Track if file at URI has been parsed for metadata.
    *
    * @var bool
    */
   protected $readFromFile = FALSE;
+
+  /**
+   * Track if metadata has been changed via ::setMetadata().
+   *
+   * @var bool
+   */
+  protected $hasMetadataChanged = FALSE;
 
   /**
    * Constructs an Exif file metadata plugin.
@@ -91,28 +98,33 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * {@inheritdoc}
    */
-  public function getMetadata($key = NULL) {
-    if ($this->metadata) {
-      return $this->getMetadataKey($key);
-    }
-    else {
-      // Metadata has not been loaded yet. Try loading it from file if URI is
-      // defined and a read attempt was not made yet.
-      if (!empty($this->uri) && !$this->readFromFile) {
-        return $this->getMetadataFromFile($key);
-      }
-      else {
-        return NULL;
-      }
-    }
+  public function loadMetadata($metadata) {
+    $this->metadata = $metadata;
+    $this->hasMetadataChanged = FALSE;
+    return $this;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setMetadata($metadata) {
-    $this->metadata = $metadata;
-    return $this;
+  public function getMetadata($key = NULL) {
+    if (!$this->metadata && !empty($this->uri) && !$this->readFromFile) {
+      // Metadata has not been loaded yet. Try loading it from file if URI is
+      // defined and a read attempt was not made yet.
+      $this->loadMetadataFromFile();
+    }
+    return $this->getMetadataKey($key);
   }
+
+  abstract protected function getMetadataKey($key = NULL);
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMetadata($key, $value) {
+    return $this->setMetadataKey($key, $value);
+  }
+
+  abstract protected function setMetadataKey($key, $value);
 
 }

@@ -79,8 +79,8 @@ class FileMetadataManagerTest extends WebTestBase {
     // Test setting metadata to an in-memory object.
     $file_metadata_from = $fmdm->useUri($image_files[0]['uri']);
     $metadata = $file_metadata_from->getMetadata('exif');
-    $new_file_metadata = $fmdm->useUri(NULL);
-    $new_file_metadata->setMetadata('exif', $metadata);
+    $new_file_metadata = $fmdm->useUri('public://test-output.jpeg');
+    $new_file_metadata->loadMetadata('exif', $metadata);
     $this->assertEqual($image_files[0]['count'], count($new_file_metadata->getMetadata('exif')));
     $this->assertIdentical($image_files[0]['Orientation'], $new_file_metadata->getMetadata('exif', 'Orientation'));
     $this->assertIdentical($image_files[0]['ShutterSpeedValue'], $new_file_metadata->getMetadata('exif', 'ShutterSpeedValue'));

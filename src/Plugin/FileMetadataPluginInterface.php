@@ -33,7 +33,9 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   /**
    * @todo
    */
-  public function getMetadata();
-  public function getMetadataFromFile();
+  public function getMetadata($key = NULL);
+  public function setMetadata($key, $value);
+  public function loadMetadata($metadata);
+  public function loadMetadataFromFile();
 
 }
