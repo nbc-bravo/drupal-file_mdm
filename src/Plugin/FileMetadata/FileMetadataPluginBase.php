@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\file_mdm\Plugin\file_mdm;
+namespace Drupal\file_mdm\Plugin\FileMetadata;
 
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Plugin\PluginBase;
@@ -60,7 +60,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   protected $hasMetadataChanged = FALSE;
 
   /**
-   * Constructs an Exif file metadata plugin.
+   * Constructs a FileMetadataPluginBase object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -130,6 +130,17 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     return $this->getMetadataKey($key);
   }
 
+  /**
+   * Gets a metadata element.
+   *
+   * @param mixed|NULL $key
+   *   A key to determine the metadata element to be returned. If NULL, the
+   *   entire metadata will be returned.
+   *
+   * @return mixed
+   *   The value of the element specified by $key. If $key is NULL, the entire
+   *   metadata.
+   */
   abstract protected function getMetadataKey($key = NULL);
 
   /**
@@ -139,6 +150,32 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     return $this->setMetadataKey($key, $value);
   }
 
+  /**
+   * Sets a metadata element.
+   *
+   * @param mixed $key
+   *   A key to determine the metadata element to be changed.
+   * @param mixed $value
+   *   The value to change the metadata element to.
+   *
+   * @return bool
+   *   TRUE if metadata was changed successfully, FALSE otherwise.
+   */
   abstract protected function setMetadataKey($key, $value);
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isSaveToFileSupported() {
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function saveMetadataToFile() {
+    // @todo error
+    return FALSE;
+  }
 
 }

@@ -15,7 +15,7 @@ class FileMetadataPluginManager extends DefaultPluginManager {
    * {@inheritdoc}
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/file_mdm', $namespaces, $module_handler, 'Drupal\file_mdm\Plugin\FileMetadataPluginInterface', 'Drupal\file_mdm\Plugin\Annotation\FileMetadata');
+    parent::__construct('Plugin/FileMetadata', $namespaces, $module_handler, 'Drupal\file_mdm\Plugin\FileMetadataPluginInterface', 'Drupal\file_mdm\Plugin\Annotation\FileMetadata');
     $this->alterInfo('file_metadata_plugin_info');
     $this->setCacheBackend($cache_backend, 'file_metadata_plugins');
   }

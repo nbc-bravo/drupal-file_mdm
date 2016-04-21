@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\file_mdm\Plugin\file_mdm;
+namespace Drupal\file_mdm\Plugin\FileMetadata;
 
 use Drupal\Core\File\FileSystemInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -32,10 +32,10 @@ class Exif extends FileMetadataPluginBase {
    *   The plugin_id for the plugin instance.
    * @param array $plugin_definition
    *   The plugin implementation definition.
-   * @param \Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface $mime_type_guesser
-   *   The MIME type mapping service.
    * @param \Drupal\Core\File\FileSystemInterface $file_system
    *   The file system service.
+   * @param \Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface $mime_type_guesser
+   *   The MIME type mapping service.
    */
   public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileSystemInterface $file_system, MimeTypeGuesserInterface $mime_type_guesser) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $file_system);
@@ -81,7 +81,7 @@ class Exif extends FileMetadataPluginBase {
   }
 
   /**
-   * @todo
+   * {@inheritdoc}
    */
   protected function getMetadataKey($key = NULL) {
     if (!$key) {
@@ -93,7 +93,7 @@ class Exif extends FileMetadataPluginBase {
   }
 
   /**
-   * @todo
+   * {@inheritdoc}
    */
   protected function setMetadataKey($key, $value) {
     if (!$key) {
