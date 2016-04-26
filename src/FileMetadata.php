@@ -67,7 +67,7 @@ class FileMetadata { // @todo implements
   }
 
   /**
-   * {@inheritdoc}
+   * @todo
    */
   protected function getFileMetadataPlugin($metadata_id) {
     if (!isset($this->plugins[$metadata_id])) {
@@ -83,8 +83,14 @@ class FileMetadata { // @todo implements
    * {@inheritdoc}
    */
   public function getMetadata($metadata_id, $key = NULL) {
-    $plugin = $this->getFileMetadataPlugin($metadata_id);
-    $metadata = $plugin->getMetadata($key);
+    try {
+      $plugin = $this->getFileMetadataPlugin($metadata_id);
+      $metadata = $plugin->getMetadata($key);
+    }
+    catch (\RuntimeExcpetion $e) {
+      $this->logger->error($e->getMessage());
+      $metadata = NULL;
+    }
     return $metadata;
   }
 

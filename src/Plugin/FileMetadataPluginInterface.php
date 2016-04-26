@@ -94,6 +94,9 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   /**
    * Loads file metadata from the file at URI/local path.
    *
+   * @throws \RuntimeException
+   *   In case there were significant errors reading from file.
+   *
    * @return bool
    *   TRUE if metadata was loaded successfully, FALSE otherwise.
    */
