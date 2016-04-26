@@ -87,7 +87,7 @@ class FileMetadata { // @todo implements
       $plugin = $this->getFileMetadataPlugin($metadata_id);
       $metadata = $plugin->getMetadata($key);
     }
-    catch (\RuntimeExcpetion $e) {
+    catch (\RuntimeException $e) {
       $this->logger->error($e->getMessage());
       $metadata = NULL;
     }
