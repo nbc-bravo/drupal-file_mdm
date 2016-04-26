@@ -59,15 +59,11 @@ class Exif extends FileMetadataPluginBase {
    * {@inheritdoc}
    */
   public function loadMetadataFromFile() {
-debug($this->uri);
-debug($this->localPath);
-    $path = $this->localPath ?: $this->fileSystem->realpath($this->uri);
-debug($path);
+    $path = $this->localPath ? $this->fileSystem->realpath($this->localPath) : $this->fileSystem->realpath($this->uri);
     if (!file_exists($path)) {
       // File does not exists, or not reachable by realpath and exif_read_data
       // cannot use stream wrappers in input.
       throw new \RuntimeException("Cannot read file at '{$this->uri}'. Local path '{$path}'");
-      return FALSE;
     }
     $this->readFromFile = TRUE;
     if (!in_array($this->mimeTypeGuesser->guess($path), ['image/jpeg', 'image/tiff'])) {
