@@ -5,6 +5,8 @@ namespace Drupal\file_mdm\Plugin\FileMetadata;
 use Drupal\Core\File\FileSystemInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
+use lsolesen\pel\PelJpeg;
+use lsolesen\pel\PelTag;
 
 /**
  * FileMetadata plugin for EXIF.
@@ -59,10 +61,9 @@ class Exif extends FileMetadataPluginBase {
    * {@inheritdoc}
    */
   public function loadMetadataFromFile() {
-    $path = $this->localPath ? $this->fileSystem->realpath($this->localPath) : $this->fileSystem->realpath($this->uri);
+    $path = $this->localPath ?: $this->uri;
     if (!file_exists($path)) {
-      // File does not exists, or not reachable by realpath and exif_read_data
-      // cannot use stream wrappers in input.
+      // File does not exists.
       throw new \RuntimeException("Cannot read file at '{$this->uri}'. Local path '{$path}'");
     }
     $this->readFromFile = TRUE;
@@ -70,11 +71,8 @@ class Exif extends FileMetadataPluginBase {
       // File does not support EXIF.
       return FALSE;
     }
-    if (!function_exists('exif_read_data')) {
-      // No PHP EXIF extension enabled.
-      throw new \RuntimeException("The PHP EXIF extension is not installed. Unable to retrieve EXIF image metadata.");
-    }
-    $this->metadata = @exif_read_data($path);
+    $jpeg = new PelJpeg($path);
+    $this->metadata = $jpeg->getExif();
     $this->hasMetadataChanged = FALSE;
     return (bool) $this->metadata;
   }
@@ -87,7 +85,7 @@ class Exif extends FileMetadataPluginBase {
       return $this->metadata;
     }
     else {
-      return isset($this->metadata[$key]) ? $this->metadata[$key] : NULL;
+      return $this->metadata->getTiff()->getIfd()->getEntry($key);
     }
   }
 
@@ -100,7 +98,7 @@ class Exif extends FileMetadataPluginBase {
       return FALSE;
     }
     else {
-      $this->metadata[$key] = $value;
+      $this->metadata->getTiff()->getIfd()->getEntry($key)->setValue($value);
       $this->hasMetadataChanged = TRUE;  // @todo only if actually changed
       return TRUE;
     }
