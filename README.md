@@ -1,28 +1,76 @@
-# file_mdm
-File metadata manager - Drupal 8 module
+# File metadata manager
 
-A file metadata manager service taking cues from discussions at [#2630242 Provide methods to retrieve EXIF image information via the Image object](https://www.drupal.org/node/2630242)
+A Drupal 8 module providing a file metadata manager service and API. Allows to get, via an unified API, information stored in files
+like EXIF photo information, TrueType font information, etc. 
 
-## Ideas:
+Metadata protocols are defined as plugins, so developers can implement a plugin and use the service to get the metadata required.
 
-1. Should be able to load and save file embedded metadata (e.g. EXIF) directly from the files.
-2. Should be also able to load/save metadata from serialised objects that can then be used in cache and or stored e.g. in file entities.
-3. Metadata should be statically cached in memory in the context of a request's lifetime. E.g. avoid different modules all call _exif_read_data_ with multiple I/O, load in memory once and then get from it.
-4. Should be pluggable i.e. the manager should use a plugin to get metadata of a specific standard from a file.
-5. Should provide an EXIF plugin to load data from image files.
-6. Should be able to specify a local path where a copy of a file stored in a remote stream wrapper exists, so that functions that do not support stream wrappers can find a viable alternative to fetch metadata.
+It also provides an EXIF metadata plugin, which uses the [PHP Exif Library](https://github.com/lsolesen/pel) to read/write EXIF information to image files, so bypassing the limitations of the standard PHP Exif extensions which only provides read capabilities.
 
-## Usage:
+This module is inspired by discussions at [#2630242 Provide methods to retrieve EXIF image information via the Image object](https://www.drupal.org/node/2630242).
+
+----------------------
+Warning: module is in development, not all stated below is implemented.
+----------------------
+
+## Service / API features:
+
+1. Load from, and save to, file embedded metadata directly from the files.
+2. Manage metadata for a file via serialised objects that can be used e.g. in cache and/or stored in file entities. This helps avoiding repeating I/O on the files.
+3. Metadata for a file is cached in memory in the context of a request's lifetime. This also helps avoiding different modules all repeat I/O on the same file.
+4. Metadata standards (EXIF, TTF, etc.) are implemented as plugins. The service loads the metadata plugin needed based on the calling code request.
+5. Manages copying to/from local temporary storage files stored in remote file systems, to allow PHP functions that do not support remote stream wrappers access the file locally.
+
+## EXIF plugin features:
+
+1. Uses the [PHP Exif Library](https://github.com/lsolesen/pel) to read/write EXIF information to image files.
+
+## Usage examples:
+
+All examples are based on using the EXIF plugin.
+
+1. Basic usage:
 
 ```php
   $fmdm = \Drupal::service('file_metadata_manager');
-  $file_metadata = $fmdm->useUri(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg');
-  $make = $file_metadata->getMetadata('exif', 'Make');
-  $model = $file_metadata->getMetadata('exif', 'Model');
-  return ['#markup' => 'make: ' . $make . ' - model: ' . $model];
+  $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
+  $make = $my_file_metadata->getMetadata('exif', 'Make');
+  $model = $my_file_metadata->getMetadata('exif', 'Model');
+  return ['#markup' => 'make: ' . $make->getValue() . ' - model: ' . $model->getValue()];
 ```
 
-will return
+will return something like
 ```
 make: Canon - model: Canon PowerShot SX10 IS
 ```
+
+2. Load metadata from a previously cached metadata object, avoiding re-reading from the file:
+
+```php
+  $fmdm = \Drupal::service('file_metadata_manager');
+  $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
+  $my_file_metadata->loadMetadata('exif', $this->myMethodForGettingCachedMetadata(...))
+  $make = $my_file_metadata->getMetadata('exif', 'Make');
+  ...
+```
+
+3. Use a known local temp copy of the remote file to avoid remote file access:
+
+```php
+  $fmdm = \Drupal::service('file_metadata_manager');
+  $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
+  $my_file_metadata->setLocalTempPath($temp_path);
+  $make = $my_file_metadata->getMetadata('exif', 'Make');
+  ...
+```
+
+4. Make a local temp copy of the remote file to avoid remote file access:
+
+```php
+  $fmdm = \Drupal::service('file_metadata_manager');
+  $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
+  $my_file_metadata->copyUriToTemp();
+  $make = $my_file_metadata->getMetadata('exif', 'Make');
+  ...
+```
+
