@@ -9,6 +9,8 @@ It also provides an EXIF metadata plugin, which uses the [PHP Exif Library](http
 
 This module is inspired by discussions at [#2630242 Provide methods to retrieve EXIF image information via the Image object](https://www.drupal.org/node/2630242).
 
+The module uses Composer to get its dependencies.
+
 ----------------------
 Warning: module is in development, not all stated below is implemented.
 ----------------------
