@@ -106,10 +106,10 @@ class FileMetadata { // @todo implements
   /**
    * {@inheritdoc}
    */
-  public function getSupportedKeys($metadata_id) {
+  public function getSupportedKeys($metadata_id, $options = NULL) {
     try {
       $plugin = $this->getFileMetadataPlugin($metadata_id);
-      $keys = $plugin->getSupportedKeys();
+      $keys = $plugin->getSupportedKeys($options);
     }
     catch (\RuntimeException $e) {
       $this->logger->error($e->getMessage());

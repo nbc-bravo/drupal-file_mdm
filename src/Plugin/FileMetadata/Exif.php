@@ -135,12 +135,16 @@ class Exif extends FileMetadataPluginBase {
       if ($ifd === NULL) {
         return NULL;
       }
-/* @todo
-      'IFD1' => PelIfd::IFD1,
-*/
       switch ($ifd_tag['ifd']) {
         case PelIfd::IFD0:
           return $ifd->getEntry($ifd_tag['tag']);
+
+        case PelIfd::IFD1:
+          $ifd1 = $ifd->getNextIfd();
+          if (!$ifd1) {
+            return NULL;
+          }
+          return $ifd1->getEntry($ifd_tag['tag']);
 
         case PelIfd::EXIF:
           $exif = $ifd->getSubIfd(PelIfd::EXIF);
@@ -178,8 +182,20 @@ class Exif extends FileMetadataPluginBase {
     // @todo
   }
 
-  public function getSupportedKeys() {
-    return array_keys($this->stringToTagMap());
+  public function getSupportedKeys($options = NULL) {
+    $map = $this->stringToTagMap();
+    if ($options) {
+      $filtered_map = [];
+      foreach ($map as $key => $tagxxx) {
+        if (in_array($options, $tagxxx['ifds'])) {
+          $filtered_map[] = $key;
+        }
+      }
+      return $filtered_map;
+    }
+    else {
+      return array_keys($map);
+    }
   }
 
   protected function stringToTag($value) {
@@ -350,6 +366,7 @@ class Exif extends FileMetadataPluginBase {
       'Exif' => PelIfd::EXIF,
       'GPS' => PelIfd::GPS,
       'Interoperability' => PelIfd::INTEROPERABILITY,
+      'Interop' => PelIfd::INTEROPERABILITY,
     ];
   }
 
