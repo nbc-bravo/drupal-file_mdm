@@ -69,7 +69,7 @@ class FileMetadata { // @todo implements
   /**
    * @todo
    */
-  protected function getFileMetadataPlugin($metadata_id) {
+  public function getFileMetadataPlugin($metadata_id) {
     if (!isset($this->plugins[$metadata_id])) {
       $this->plugins[$metadata_id] = $this->pluginManager->createInstance($metadata_id);
       $this->plugins[$metadata_id]
