@@ -3,6 +3,7 @@
 namespace Drupal\file_mdm;
 
 use Drupal\file_mdm\Plugin\FileMetadataPluginManager;
+use Psr\Log\LoggerInterface;
 
 /**
  * A file metadata object.
@@ -15,6 +16,13 @@ class FileMetadata { // @todo implements
    * @var \Drupal\file_mdm\Plugin\FileMetadataPluginManager
    */
   protected $pluginManager;
+
+  /**
+   * The file_mdm logger.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
 
   /**
    * The URI of the file.
@@ -36,8 +44,9 @@ class FileMetadata { // @todo implements
 
   protected $plugins = [];
 
-  public function __construct(FileMetadataPluginManager $plugin_manager, $uri) {
+  public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, $uri) {
     $this->pluginManager = $plugin_manager;
+    $this->logger = $logger;
     $this->uri = $uri;
   }
 

@@ -81,26 +81,89 @@ class Exif extends FileMetadataPluginBase {
   /**
    * {@inheritdoc}
    */
+  protected function resolveKeyToIfdAndTag($key) {
+    if ($key === NULL) {
+      throw new \RuntimeException('No key passed');
+    }
+    if (is_string($key)) {
+      $tagxxx = $this->stringToTag($key);
+      if (!isset($tagxxx['ifds'][0])) {
+        throw new \RuntimeException("No default ifd available for '{$key}'");
+      }
+      return ['ifd' => $this->stringToIfd($tagxxx['ifds'][0]), 'tag' => $tagxxx['tag']];
+    }
+    if (is_array($key)) {
+      // Deal with tag.
+      if (is_string($key[0])) {
+        $tagxxx = $this->stringToTag($key[0]);
+        $tag = $tagxxx['tag'];
+      }
+      elseif (is_int($key[0])) {
+        $tag = $key[0];
+      }
+      else {
+        throw new \RuntimeException("Invalid Exif tag specified");
+      }
+      // Deal with ifd.
+      if (is_string($key[0]) && !isset($key[1])) {
+        $tagxxx = $this->stringToTag($key[0]);
+        if (!isset($tagxxx['ifds'][0])) {
+          throw new \RuntimeException("No default ifd available for '{$key[0]}'");
+        }
+        $ifd = $this->stringToIfd($tagxxx['ifds'][0]);
+      }
+      elseif (is_string($key[1])) {
+        $ifd = $this->stringToIfd($key[1]);
+        if ($ifd === NULL) {
+          throw new \RuntimeException("Invalid Ifd '{$key[1]}' specified");
+        }
+      }
+      else {
+        throw new \RuntimeException("Invalid Ifd specified");
+      }
+      return ['ifd' => $ifd, 'tag' => $tag];
+    }
+    throw new \RuntimeException('Invalid key passed');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function getMetadataKey($key = NULL) {
     if (!$key) {
       return $this->metadata;
     }
     else {
-      $tag = is_string($key) ? $this->stringToTag($key) : $key;
-      switch ($this->stringToIfd($tag['ifds'][0])) {
-/*      '0' => PelIfd::IFD0,
-      '1' => PelIfd::IFD1,
-      'Exif' => PelIfd::EXIF,
+      $ifd_tag = $this->resolveKeyToIfdAndTag($key);
+      $ifd = $this->metadata->getTiff()->getIfd();
+      if ($ifd === NULL) {
+        return NULL;
+      }
+/* @todo
+      'IFD1' => PelIfd::IFD1,
       'GPS' => PelIfd::GPS,
-      'Interoperability' => PelIfd::INTEROPERABILITY,*/
+*/
+      switch ($ifd_tag['ifd']) {
         case PelIfd::IFD0:
-          return $this->metadata->getTiff()->getIfd()->getEntry($tag['tag']);
+          return $ifd->getEntry($ifd_tag['tag']);
 
         case PelIfd::EXIF:
-          return $this->metadata->getTiff()->getIfd()->getSubIfd(PelIfd::EXIF)->getEntry($tag['tag']);
+          $exif = $ifd->getSubIfd(PelIfd::EXIF);
+          if (!$exif) {
+            return NULL;
+          }
+          return $exif->getEntry($ifd_tag['tag']);
 
         case PelIfd::INTEROPERABILITY:
-          return $this->metadata->getTiff()->getIfd()->getSubIfd(PelIfd::EXIF)->getSubIfd(PelIfd::INTEROPERABILITY)->getEntry($tag['tag']);
+          $exif = $ifd->getSubIfd(PelIfd::EXIF);
+          if (!$exif) {
+            return NULL;
+          }
+          $interop = $exif->getSubIfd(PelIfd::INTEROPERABILITY);
+          if (!$interop) {
+            return NULL;
+          }
+          return $interop->getEntry($ifd_tag['tag']);
 
       }
     }
@@ -110,20 +173,14 @@ class Exif extends FileMetadataPluginBase {
    * {@inheritdoc}
    */
   protected function setMetadataKey($key, $value) {
-    if (!$key) {
-      // @todo error;
-      return FALSE;
-    }
-    else {
-      $key = is_string($key) ? $this->stringToTag($key) : $key;
-      return $this->metadata->getTiff()->getIfd()->getEntry($key['tag'])->setValue($value);
-      $this->hasMetadataChanged = TRUE;  // @todo only if actually changed
-      return TRUE;
-    }
+    // @todo
   }
 
   protected function stringToTag($value) {
-    return isset($this->stringToTagMap()[$value]) ? $this->stringToTagMap()[$value] : NULL;
+    if (isset($this->stringToTagMap()[$value])) {
+      return $this->stringToTagMap()[$value];
+    }
+    throw new \RuntimeException("No Exif tag found for '{$value}'");
   }
 
   protected function stringToTagMap() {
@@ -135,50 +192,50 @@ class Exif extends FileMetadataPluginBase {
       'RelatedImageWidth' => ['tag' => 0x1001, 'ifds' => ['Interoperability']],
       'RelatedImageLength' => ['tag' => 0x1002, 'ifds' => ['Interoperability']],
       // EXIF tags.
-      'ImageWidth' => ['tag' => 0x0100, 'ifds' => ['0', '1']],
-      'ImageLength' => ['tag' => 0x0101, 'ifds' => ['0', '1']],
-      'BitsPerSample' => ['tag' => 0x0102, 'ifds' => ['0', '1']],
-      'Compression' => ['tag' => 0x0103, 'ifds' => ['0', '1']],
-      'PhotometricInterpretation' => ['tag' => 0x0106, 'ifds' => ['0', '1']],
+      'ImageWidth' => ['tag' => 0x0100, 'ifds' => ['IFD0', 'IFD1']],
+      'ImageLength' => ['tag' => 0x0101, 'ifds' => ['IFD0', 'IFD1']],
+      'BitsPerSample' => ['tag' => 0x0102, 'ifds' => ['IFD0', 'IFD1']],
+      'Compression' => ['tag' => 0x0103, 'ifds' => ['IFD0', 'IFD1']],
+      'PhotometricInterpretation' => ['tag' => 0x0106, 'ifds' => ['IFD0', 'IFD1']],
       'FillOrder' => ['tag' => 0x010A, 'ifds' => []],
       'DocumentName' => ['tag' => 0x010D, 'ifds' => []],
-      'ImageDescription' => ['tag' => 0x010E, 'ifds' => ['0', '1']],
-      'Make' => ['tag' => 0x010F, 'ifds' => ['0', '1']],
-      'Model' => ['tag' => 0x0110, 'ifds' => ['0', '1']],
-      'StripOffsets' => ['tag' => 0x0111, 'ifds' => ['0', '1']],
-      'Orientation' => ['tag' => 0x0112, 'ifds' => ['0', '1']],
-      'SamplesPerPixel' => ['tag' => 0x0115, 'ifds' => ['0', '1']],
-      'RowsPerStrip' => ['tag' => 0x0116, 'ifds' => ['0', '1']],
-      'StripByteCounts' => ['tag' => 0x0117, 'ifds' => ['0', '1']],
-      'XResolution' => ['tag' => 0x011A, 'ifds' => ['0', '1']],
-      'YResolution' => ['tag' => 0x011B, 'ifds' => ['0', '1']],
-      'PlanarConfiguration' => ['tag' => 0x011C, 'ifds' => ['0', '1']],
-      'ResolutionUnit' => ['tag' => 0x0128, 'ifds' => ['0', '1']],
-      'TransferFunction' => ['tag' => 0x012D, 'ifds' => ['0', '1']],
-      'Software' => ['tag' => 0x0131, 'ifds' => ['0', '1']],
-      'DateTime' => ['tag' => 0x0132, 'ifds' => ['0', '1']],
-      'Artist' => ['tag' => 0x013B, 'ifds' => ['0', '1']],
-      'WhitePoint' => ['tag' => 0x013E, 'ifds' => ['0', '1']],
-      'PrimaryChromaticities' => ['tag' => 0x013F, 'ifds' => ['0', '1']],
+      'ImageDescription' => ['tag' => 0x010E, 'ifds' => ['IFD0', 'IFD1']],
+      'Make' => ['tag' => 0x010F, 'ifds' => ['IFD0', 'IFD1']],
+      'Model' => ['tag' => 0x0110, 'ifds' => ['IFD0', 'IFD1']],
+      'StripOffsets' => ['tag' => 0x0111, 'ifds' => ['IFD0', 'IFD1']],
+      'Orientation' => ['tag' => 0x0112, 'ifds' => ['IFD0', 'IFD1']],
+      'SamplesPerPixel' => ['tag' => 0x0115, 'ifds' => ['IFD0', 'IFD1']],
+      'RowsPerStrip' => ['tag' => 0x0116, 'ifds' => ['IFD0', 'IFD1']],
+      'StripByteCounts' => ['tag' => 0x0117, 'ifds' => ['IFD0', 'IFD1']],
+      'XResolution' => ['tag' => 0x011A, 'ifds' => ['IFD0', 'IFD1']],
+      'YResolution' => ['tag' => 0x011B, 'ifds' => ['IFD0', 'IFD1']],
+      'PlanarConfiguration' => ['tag' => 0x011C, 'ifds' => ['IFD0', 'IFD1']],
+      'ResolutionUnit' => ['tag' => 0x0128, 'ifds' => ['IFD0', 'IFD1']],
+      'TransferFunction' => ['tag' => 0x012D, 'ifds' => ['IFD0', 'IFD1']],
+      'Software' => ['tag' => 0x0131, 'ifds' => ['IFD0', 'IFD1']],
+      'DateTime' => ['tag' => 0x0132, 'ifds' => ['IFD0', 'IFD1']],
+      'Artist' => ['tag' => 0x013B, 'ifds' => ['IFD0', 'IFD1']],
+      'WhitePoint' => ['tag' => 0x013E, 'ifds' => ['IFD0', 'IFD1']],
+      'PrimaryChromaticities' => ['tag' => 0x013F, 'ifds' => ['IFD0', 'IFD1']],
       'TransferRange' => ['tag' => 0x0156, 'ifds' => []],
       'JPEGProc' => ['tag' => 0x0200, 'ifds' => []],
-      'JPEGInterchangeFormat' => ['tag' => 0x0201, 'ifds' => ['0', '1']],
-      'JPEGInterchangeFormatLength' => ['tag' => 0x0202, 'ifds' => ['0', '1']],
-      'YCbCrCoefficients' => ['tag' => 0x0211, 'ifds' => ['0', '1']],
-      'YCbCrSubSampling' => ['tag' => 0x0212, 'ifds' => ['0', '1']],
-      'YCbCrPositioning' => ['tag' => 0x0213, 'ifds' => ['0', '1']],
-      'ReferenceBlackWhite' => ['tag' => 0x0214, 'ifds' => ['0', '1']],
+      'JPEGInterchangeFormat' => ['tag' => 0x0201, 'ifds' => ['IFD0', 'IFD1']],
+      'JPEGInterchangeFormatLength' => ['tag' => 0x0202, 'ifds' => ['IFD0', 'IFD1']],
+      'YCbCrCoefficients' => ['tag' => 0x0211, 'ifds' => ['IFD0', 'IFD1']],
+      'YCbCrSubSampling' => ['tag' => 0x0212, 'ifds' => ['IFD0', 'IFD1']],
+      'YCbCrPositioning' => ['tag' => 0x0213, 'ifds' => ['IFD0', 'IFD1']],
+      'ReferenceBlackWhite' => ['tag' => 0x0214, 'ifds' => ['IFD0', 'IFD1']],
       'CFARepeatPatternDim' => ['tag' => 0x828D, 'ifds' => []],
       'BatteryLevel' => ['tag' => 0x828F, 'ifds' => []],
-      'Copyright' => ['tag' => 0x8298, 'ifds' => ['0', '1']],
+      'Copyright' => ['tag' => 0x8298, 'ifds' => ['IFD0', 'IFD1']],
       'ExposureTime' => ['tag' => 0x829A, 'ifds' => ['Exif']],
       'FNumber' => ['tag' => 0x829D, 'ifds' => ['Exif']],
       'IPTC/NAA' => ['tag' => 0x83BB, 'ifds' => []],
-      'ExifIFDPointer' => ['tag' => 0x8769, 'ifds' => ['0', '1']],
+      'ExifIFDPointer' => ['tag' => 0x8769, 'ifds' => ['IFD0', 'IFD1']],
       'InterColorProfile' => ['tag' => 0x8773, 'ifds' => []],
       'ExposureProgram' => ['tag' => 0x8822, 'ifds' => ['Exif']],
       'SpectralSensitivity' => ['tag' => 0x8824, 'ifds' => ['Exif']],
-      'GPSInfoIFDPointer' => ['tag' => 0x8825, 'ifds' => ['0', '1']],
+      'GPSInfoIFDPointer' => ['tag' => 0x8825, 'ifds' => ['IFD0', 'IFD1']],
       'ISOSpeedRatings' => ['tag' => 0x8827, 'ifds' => ['Exif']],
       'OECF' => ['tag' => 0x8828, 'ifds' => ['Exif']],
       'ExifVersion' => ['tag' => 0x9000, 'ifds' => ['Exif']],
@@ -202,11 +259,11 @@ class Exif extends FileMetadataPluginBase {
       'SubSecTime' => ['tag' => 0x9290, 'ifds' => ['Exif']],
       'SubSecTimeOriginal' => ['tag' => 0x9291, 'ifds' => ['Exif']],
       'SubSecTimeDigitized' => ['tag' => 0x9292, 'ifds' => ['Exif']],
-      'WindowsXPTitle' => ['tag' => 0x9C9B, 'ifds' => ['0', '1']],
-      'WindowsXPComment' => ['tag' => 0x9C9C, 'ifds' => ['0', '1']],
-      'WindowsXPAuthor' => ['tag' => 0x9C9D, 'ifds' => ['0', '1']],
-      'WindowsXPKeywords' => ['tag' => 0x9C9E, 'ifds' => ['0', '1']],
-      'WindowsXPSubject' => ['tag' => 0x9C9F, 'ifds' => ['0', '1']],
+      'WindowsXPTitle' => ['tag' => 0x9C9B, 'ifds' => ['IFD0', 'IFD1']],
+      'WindowsXPComment' => ['tag' => 0x9C9C, 'ifds' => ['IFD0', 'IFD1']],
+      'WindowsXPAuthor' => ['tag' => 0x9C9D, 'ifds' => ['IFD0', 'IFD1']],
+      'WindowsXPKeywords' => ['tag' => 0x9C9E, 'ifds' => ['IFD0', 'IFD1']],
+      'WindowsXPSubject' => ['tag' => 0x9C9F, 'ifds' => ['IFD0', 'IFD1']],
       'FlashPixVersion' => ['tag' => 0xA000, 'ifds' => ['Exif']],
       'ColorSpace' => ['tag' => 0xA001, 'ifds' => ['Exif']],
       'PixelXDimension' => ['tag' => 0xA002, 'ifds' => ['Exif']],
@@ -238,7 +295,7 @@ class Exif extends FileMetadataPluginBase {
       'SubjectDistanceRange' => ['tag' => 0xA40C, 'ifds' => ['Exif']],
       'ImageUniqueID' => ['tag' => 0xA420, 'ifds' => ['Exif']],
       'Gamma' => ['tag' => 0xA500, 'ifds' => ['Exif']],
-      'PrintIM' => ['tag' => 0xC4A5, 'ifds' => ['0', '1']],
+      'PrintIM' => ['tag' => 0xC4A5, 'ifds' => ['IFD0', 'IFD1']],
       // GPS tags.
       'GPSVersionID' => ['tag' => 0x0000, 'ifds' => ['GPS']],
       'GPSLatitudeRef' => ['tag' => 0x0001, 'ifds' => ['GPS']],
@@ -280,8 +337,10 @@ class Exif extends FileMetadataPluginBase {
 
   protected function stringToIfdMap() {
     return [
-      '0' => PelIfd::IFD0,
-      '1' => PelIfd::IFD1,
+      'IFD0' => PelIfd::IFD0,
+      'Main' => PelIfd::IFD0,
+      'IFD1' => PelIfd::IFD1,
+      'Thumbnail' => PelIfd::IFD1,
       'Exif' => PelIfd::EXIF,
       'GPS' => PelIfd::GPS,
       'Interoperability' => PelIfd::INTEROPERABILITY,

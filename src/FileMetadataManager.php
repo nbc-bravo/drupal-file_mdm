@@ -79,7 +79,7 @@ class FileMetadataManager { // @todo implements
     $uri_hash = $this->hasUri($uri);
     if (!$uri_hash) {
       $uri_hash = hash('sha256', $uri);
-      $this->files[$uri_hash] = new FileMetadata($this->pluginManager, $uri);
+      $this->files[$uri_hash] = new FileMetadata($this->pluginManager, $this->logger, $uri);
     }
     return $this->files[$uri_hash];
   }
