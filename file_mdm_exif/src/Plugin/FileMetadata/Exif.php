@@ -1,8 +1,9 @@
 <?php
 
-namespace Drupal\file_mdm\Plugin\FileMetadata;
+namespace Drupal\file_mdm_exif\Plugin\FileMetadata;
 
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\file_mdm\Plugin\FileMetadataPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use lsolesen\pel\PelIfd;

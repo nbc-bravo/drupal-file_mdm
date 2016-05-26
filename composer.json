@@ -1,8 +1,5 @@
 {
     "name": "drupal/file_mdm",
     "type": "drupal-module",
-    "description": "Provides a service to manage file metadata (for example, EXIF image information).",
-    "require": {
-        "lsolesen/pel": "0.9.*"
-    }
+    "description": "Provides a service to manage file metadata.",
 }
