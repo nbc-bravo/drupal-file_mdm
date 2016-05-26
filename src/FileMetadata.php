@@ -106,9 +106,23 @@ class FileMetadata { // @todo implements
   /**
    * {@inheritdoc}
    */
+  public function getSupportedKeys($metadata_id) {
+    try {
+      $plugin = $this->getFileMetadataPlugin($metadata_id);
+      $keys = $plugin->getSupportedKeys();
+    }
+    catch (\RuntimeException $e) {
+      $this->logger->error($e->getMessage());
+      $keys = NULL;
+    }
+    return $keys;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function setMetadata($metadata_id, $key, $value) {
-    $plugin = $this->getFileMetadataPlugin($metadata_id);
-    return $plugin->setMetadata($key, $value);
+    // @todo
   }
 
   /**

@@ -93,33 +93,29 @@ class Exif extends FileMetadataPluginBase {
       return ['ifd' => $this->stringToIfd($tagxxx['ifds'][0]), 'tag' => $tagxxx['tag']];
     }
     if (is_array($key)) {
-      // Deal with tag.
-      if (is_string($key[0])) {
-        $tagxxx = $this->stringToTag($key[0]);
-        $tag = $tagxxx['tag'];
-      }
-      elseif (is_int($key[0])) {
-        $tag = $key[0];
-      }
-      else {
+      if (!isset($key[0]) || !isset($key[1])) {
         throw new \RuntimeException("Invalid Exif tag specified");
       }
       // Deal with ifd.
-      if (is_string($key[0]) && !isset($key[1])) {
-        $tagxxx = $this->stringToTag($key[0]);
-        if (!isset($tagxxx['ifds'][0])) {
-          throw new \RuntimeException("No default ifd available for '{$key[0]}'");
-        }
-        $ifd = $this->stringToIfd($tagxxx['ifds'][0]);
-      }
-      elseif (is_string($key[1])) {
-        $ifd = $this->stringToIfd($key[1]);
+      if (is_string($key[0])) {
+        $ifd = $this->stringToIfd($key[0]);
         if ($ifd === NULL) {
-          throw new \RuntimeException("Invalid Ifd '{$key[1]}' specified");
+          throw new \RuntimeException("Invalid Ifd '{$key[0]}' specified");
         }
       }
       else {
         throw new \RuntimeException("Invalid Ifd specified");
+      }
+      // Deal with tag.
+      if (is_string($key[1])) {
+        $tagxxx = $this->stringToTag($key[1]);
+        $tag = $tagxxx['tag'];
+      }
+      elseif (is_int($key[1])) {
+        $tag = $key[1];
+      }
+      else {
+        throw new \RuntimeException("Invalid Exif tag specified");
       }
       return ['ifd' => $ifd, 'tag' => $tag];
     }
@@ -141,7 +137,6 @@ class Exif extends FileMetadataPluginBase {
       }
 /* @todo
       'IFD1' => PelIfd::IFD1,
-      'GPS' => PelIfd::GPS,
 */
       switch ($ifd_tag['ifd']) {
         case PelIfd::IFD0:
@@ -165,6 +160,13 @@ class Exif extends FileMetadataPluginBase {
           }
           return $interop->getEntry($ifd_tag['tag']);
 
+        case PelIfd::GPS:
+          $gps = $ifd->getSubIfd(PelIfd::GPS);
+          if (!$gps) {
+            return NULL;
+          }
+          return $gps->getEntry($ifd_tag['tag']);
+
       }
     }
   }
@@ -176,6 +178,10 @@ class Exif extends FileMetadataPluginBase {
     // @todo
   }
 
+  public function getSupportedKeys() {
+    return array_keys($this->stringToTagMap());
+  }
+
   protected function stringToTag($value) {
     if (isset($this->stringToTagMap()[$value])) {
       return $this->stringToTagMap()[$value];
@@ -185,12 +191,6 @@ class Exif extends FileMetadataPluginBase {
 
   protected function stringToTagMap() {
     return [
-      // Interoperability tags.
-      'InteroperabilityIndex' => ['tag' => 0x0001, 'ifds' => ['Interoperability']],
-      'InteroperabilityVersion' => ['tag' => 0x0002, 'ifds' => ['Interoperability']],
-      'RelatedImageFileFormat' => ['tag' => 0x1000, 'ifds' => ['Interoperability']],
-      'RelatedImageWidth' => ['tag' => 0x1001, 'ifds' => ['Interoperability']],
-      'RelatedImageLength' => ['tag' => 0x1002, 'ifds' => ['Interoperability']],
       // EXIF tags.
       'ImageWidth' => ['tag' => 0x0100, 'ifds' => ['IFD0', 'IFD1']],
       'ImageLength' => ['tag' => 0x0101, 'ifds' => ['IFD0', 'IFD1']],
@@ -296,6 +296,12 @@ class Exif extends FileMetadataPluginBase {
       'ImageUniqueID' => ['tag' => 0xA420, 'ifds' => ['Exif']],
       'Gamma' => ['tag' => 0xA500, 'ifds' => ['Exif']],
       'PrintIM' => ['tag' => 0xC4A5, 'ifds' => ['IFD0', 'IFD1']],
+      // Interoperability tags.
+      'InteroperabilityIndex' => ['tag' => 0x0001, 'ifds' => ['Interoperability']],
+      'InteroperabilityVersion' => ['tag' => 0x0002, 'ifds' => ['Interoperability']],
+      'RelatedImageFileFormat' => ['tag' => 0x1000, 'ifds' => ['Interoperability']],
+      'RelatedImageWidth' => ['tag' => 0x1001, 'ifds' => ['Interoperability']],
+      'RelatedImageLength' => ['tag' => 0x1002, 'ifds' => ['Interoperability']],
       // GPS tags.
       'GPSVersionID' => ['tag' => 0x0000, 'ifds' => ['GPS']],
       'GPSLatitudeRef' => ['tag' => 0x0001, 'ifds' => ['GPS']],
