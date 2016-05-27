@@ -59,7 +59,7 @@ class FileMetadataManager { // @todo implements
   public function debugDumpHashes() {
     $ret = [];
     foreach ($this->files as $hash => $file) {
-      $ret[] = [$hash, $file->getUri(), $file->getLocalPath()];
+      $ret[] = [$hash, $file->getUri(), $file->getLocalTempPath()];
     }
     debug($ret);
   }

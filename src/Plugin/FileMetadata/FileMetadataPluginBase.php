@@ -28,17 +28,6 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   protected $uri = '';
 
   /**
-   * The local filesystem path to the file.
-   *
-   * This is used to allow accessing local copies of files stored remotely, to
-   * minimise remote calls and allow functions that cannot access remote stream
-   * wrappers to operate locally.
-   *
-   * @var string
-   */
-  protected $localPath = '';
-
-  /**
    * The metadata of the file.
    *
    * @var mixed
@@ -92,21 +81,6 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    */
   public function getUri() {
     return $this->uri;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setLocalPath($path) {
-    $this->localPath = $path;
-    return $this;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLocalPath() {
-    return $this->localPath;
   }
 
   /**

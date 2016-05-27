@@ -75,17 +75,16 @@ class Exif extends FileMetadataPluginBase {
    * {@inheritdoc}
    */
   public function loadMetadataFromFile() {
-    $path = $this->localPath ?: $this->uri;
-    if (!file_exists($path)) {
+    if (!file_exists($this->getUri())) {
       // File does not exists.
-      throw new \RuntimeException("Cannot read file at '{$this->uri}'. Local path '{$path}'");
+      throw new \RuntimeException("Cannot read file at '{$this->getUri()}'");
     }
     $this->readFromFile = TRUE;
-    if (!in_array($this->mimeTypeGuesser->guess($path), ['image/jpeg', 'image/tiff'])) {
+    if (!in_array($this->mimeTypeGuesser->guess($this->getUri()), ['image/jpeg', 'image/tiff'])) {
       // File does not support EXIF.
       return FALSE;
     }
-    $jpeg = new PelJpeg($path);
+    $jpeg = new PelJpeg($this->getUri());
     $this->metadata = $jpeg->getExif();
     $this->hasMetadataChanged = FALSE;
     return (bool) $this->metadata;

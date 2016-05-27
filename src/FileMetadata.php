@@ -40,7 +40,7 @@ class FileMetadata { // @todo implements
    *
    * @var string
    */
-  protected $localPath = '';
+  protected $localTempPath;
 
   protected $plugins = [];
 
@@ -60,17 +60,17 @@ class FileMetadata { // @todo implements
   /**
    * {@inheritdoc}
    */
-  public function getLocalPath() {
-    return $this->localPath;
+  public function getLocalTempPath() {
+    return $this->localTempPath;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setLocalPath($path) {
-    $this->localPath = $path;
+  public function setLocalTempPath($path) {
+    $this->localTempPath = $path;
     foreach ($this->plugins as $plugin) {
-      $plugin->setLocalPath($this->localPath);
+      $plugin->setUri($this->localTempPath);
     }
     return $this;
   }
@@ -81,9 +81,7 @@ class FileMetadata { // @todo implements
   public function getFileMetadataPlugin($metadata_id) {
     if (!isset($this->plugins[$metadata_id])) {
       $this->plugins[$metadata_id] = $this->pluginManager->createInstance($metadata_id);
-      $this->plugins[$metadata_id]
-        ->setUri($this->uri)
-        ->setLocalPath($this->localPath);
+      $this->plugins[$metadata_id]->setUri($this->localTempPath ?: $this->uri);
     }
     return $this->plugins[$metadata_id];
   }

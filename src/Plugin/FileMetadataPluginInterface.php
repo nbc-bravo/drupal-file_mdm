@@ -29,32 +29,6 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   public function getUri();
 
   /**
-   * Sets the local filesystem path to the file.
-   *
-   * This is used to allow accessing local copies of files stored remotely, to
-   * minimise remote calls and allow functions that cannot access remote stream
-   * wrappers to operate locally.
-   *
-   * @param string $path
-   *   A filesystem path.
-   *
-   * @return $this
-   */
-  public function setLocalPath($path);
-
-  /**
-   * Gets the local filesystem path to the file.
-   *
-   * This is used to allow accessing local copies of files stored remotely, to
-   * minimise remote calls and allow functions that cannot access remote stream
-   * wrappers to operate locally.
-   *
-   * @return string
-   *   The local filesystem path to the file.
-   */
-  public function getLocalPath();
-
-  /**
    * Gets a metadata element.
    *
    * @param mixed|NULL $key
