@@ -27,6 +27,11 @@ class ExifTagMapper {  // @todo implements
    */
   protected $configFactory;
 
+  protected $stringToIfdMap;
+  protected $stringToTagMap;
+  protected $supportedKeysMap;
+  protected $supportedIfdsMap;
+
   /**
    * Constructs a ExifTagMapper object.
    *
@@ -61,17 +66,16 @@ class ExifTagMapper {  // @todo implements
       // Deal with ifd.
       if (is_string($key[0])) {
         $ifd = $this->stringToIfd($key[0]);
-        if ($ifd === NULL) {
-          throw new \RuntimeException("Invalid Ifd '{$key[0]}' specified");
-        }
+      }
+      elseif (is_int($key[0])) {
+        $ifd = $key[0];
       }
       else {
         throw new \RuntimeException("Invalid Ifd specified");
       }
       // Deal with tag.
       if (is_string($key[1])) {
-        $tagxxx = $this->stringToTag($key[1]);
-        $tag = $tagxxx['tag'];
+        $tag = $this->stringToTag($key[1]);
       }
       elseif (is_int($key[1])) {
         $tag = $key[1];
@@ -85,51 +89,85 @@ class ExifTagMapper {  // @todo implements
   }
 
   public function getSupportedKeys($options = NULL) {
-    $map = $this->stringToTagMap();
-    if ($options) {
-      $filtered_map = [];
-      foreach ($map as $key => $tagxxx) {
-        if (in_array($options, $tagxxx['ifds'])) {
-          $filtered_map[] = $key;
-        }
-      }
-      return $filtered_map;
+    if ($options !== NULL && !is_array($options)) {
+      throw new \RuntimeException('Invalid options passed to getSupportedKeys');
+    }
+    if (isset($options['ifds'])) {
+      return $this->getSupportedIfdsMap();
+    }
+    elseif (isset($options['ifd'])) {
+      return array_filter($this->getSupportedKeysMap(), function ($a) use ($options) { return strtolower($options['ifd']) === strtolower($a[0]); });
     }
     else {
-      return array_keys($map);
+      return $this->getSupportedKeysMap();
     }
   }
 
+  protected function getSupportedIfdsMap() {
+    if (!$this->supportedIfdsMap) {
+      $config_map = $this->configFactory->get('file_mdm_exif.settings')->get('ifd_map');
+      $this->supportedIfdsMap = [];
+      foreach ($config_map as $key => $value) {
+        $this->supportedIfdsMap[] = [$key, $value['type']];
+      }
+    }
+    return $this->supportedIfdsMap;
+  }
+
+  protected function getSupportedKeysMap() {
+    if (!$this->supportedKeysMap) {
+      $config_map = $this->configFactory->get('file_mdm_exif.settings')->get('tag_map');
+      $this->supportedKeysMap = [];
+      foreach ($config_map as $key => $value) {
+        foreach ($value['ifds'] as $ifd) {
+          $this->supportedKeysMap[] = [$ifd, $key];
+        }
+      }
+    }
+    return $this->supportedKeysMap;
+  }
+
   protected function stringToTag($value) {
-    if (isset($this->stringToTagMap()[$value])) {
-      $v = $this->stringToTagMap()[$value];
-      $hex = substr($v['tag'], 1, 4);
-      $v['tag'] = hexdec($hex);
-      return $v;
+    $v = strtolower($value);
+    if (isset($this->getStringToTagMap()[$v])) {
+      return $this->getStringToTagMap()[$v];
     }
     throw new \RuntimeException("No Exif tag found for '{$value}'");
   }
 
-  protected function stringToTagMap() {
-    $map = $this->configFactory->get('file_mdm_exif.settings')->get('tag_map');
-    return $map;
+  protected function getStringToTagMap() {
+    if (!$this->stringToTagMap) {
+      $config_map = $this->configFactory->get('file_mdm_exif.settings')->get('tag_map');
+      $this->stringToTagMap = [];
+      foreach ($config_map as $key => $value) {
+        $k = strtolower($key);
+        $hex = substr($value['tag'], 1, 4);
+        $this->stringToTagMap[$k] = hexdec($hex);
+      }
+    }
+    return $this->stringToTagMap;
   }
 
   protected function stringToIfd($value) {
-    return isset($this->stringToIfdMap()[$value]) ? $this->stringToIfdMap()[$value] : NULL;
+    $v = strtolower($value);
+    if (isset($this->getStringToIfdMap()[$v])) {
+      return $this->getStringToIfdMap()[$v];
+    }
+    throw new \RuntimeException("Invalid Ifd '{$value}' specified");
   }
 
-  protected function stringToIfdMap() {
-    return [
-      'IFD0' => PelIfd::IFD0,
-      'Main' => PelIfd::IFD0,
-      'IFD1' => PelIfd::IFD1,
-      'Thumbnail' => PelIfd::IFD1,
-      'Exif' => PelIfd::EXIF,
-      'GPS' => PelIfd::GPS,
-      'Interoperability' => PelIfd::INTEROPERABILITY,
-      'Interop' => PelIfd::INTEROPERABILITY,
-    ];
+  protected function getStringToIfdMap() {
+    if (!$this->stringToIfdMap) {
+      $config_map = $this->configFactory->get('file_mdm_exif.settings')->get('ifd_map');
+      $this->stringToIfdMap = [];
+      foreach ($config_map as $key => $value) {
+        foreach ($value['aliases'] as $alias) {
+          $k = strtolower($alias);
+          $this->stringToIfdMap[$k] = $value['type'];
+        }
+      }
+    }
+    return $this->stringToIfdMap;
   }
 
 }

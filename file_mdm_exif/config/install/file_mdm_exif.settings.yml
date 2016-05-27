@@ -1,3 +1,27 @@
+ifd_map:
+  IFD0:
+    type: 0
+    aliases:
+      - IFD0
+      - Main
+  IFD1:
+    type: 1
+    aliases:
+      - IFD1
+      - Thumbnail
+  Exif:
+    type: 2
+    aliases:
+      - Exif
+  GPS:
+    type: 3
+    aliases:
+      - GPS
+  Interoperability:
+    type: 4
+    aliases:
+      - Interoperability
+      - Interop
 tag_map:
   ImageWidth:
     tag: '#0100'
