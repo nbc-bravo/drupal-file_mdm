@@ -53,11 +53,11 @@ class ExifTagMapper {  // @todo implements
       throw new \RuntimeException('No key passed');
     }
     if (is_string($key)) {
-      $tagxxx = $this->stringToTag($key);
-      if (!isset($tagxxx['ifds'][0])) {
+      $tag = $this->stringToTag($key);
+      if (!$tag[0]) {
         throw new \RuntimeException("No default ifd available for '{$key}'");
       }
-      return ['ifd' => $this->stringToIfd($tagxxx['ifds'][0]), 'tag' => $tagxxx['tag']];
+      return ['ifd' => $tag[0], 'tag' => $tag[1]];
     }
     if (is_array($key)) {
       if (!isset($key[0]) || !isset($key[1])) {
@@ -75,7 +75,7 @@ class ExifTagMapper {  // @todo implements
       }
       // Deal with tag.
       if (is_string($key[1])) {
-        $tag = $this->stringToTag($key[1]);
+        $tag = $this->stringToTag($key[1])[1];
       }
       elseif (is_int($key[1])) {
         $tag = $key[1];
@@ -142,7 +142,7 @@ class ExifTagMapper {  // @todo implements
       foreach ($config_map as $key => $value) {
         $k = strtolower($key);
         $hex = substr($value['tag'], 1, 4);
-        $this->stringToTagMap[$k] = hexdec($hex);
+        $this->stringToTagMap[$k] = [isset($value['ifds'][0]) ? $value['ifds'][0] : NULL, hexdec($hex)];
       }
     }
     return $this->stringToTagMap;
