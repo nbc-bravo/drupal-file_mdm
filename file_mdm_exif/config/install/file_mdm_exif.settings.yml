@@ -1,0 +1,590 @@
+tag_map:
+  ImageWidth:
+    tag: '#0100'
+    ifds:
+      - IFD0
+      - IFD1
+  ImageLength:
+    tag: '#0101'
+    ifds:
+      - IFD0
+      - IFD1
+  BitsPerSample:
+    tag: '#0102'
+    ifds:
+      - IFD0
+      - IFD1
+  Compression:
+    tag: '#0103'
+    ifds:
+      - IFD0
+      - IFD1
+  PhotometricInterpretation:
+    tag: '#0106'
+    ifds:
+      - IFD0
+      - IFD1
+  FillOrder:
+    tag: '#010A'
+    ifds: {  }
+  DocumentName:
+    tag: '#010D'
+    ifds: {  }
+  ImageDescription:
+    tag: '#010E'
+    ifds:
+      - IFD0
+      - IFD1
+  Make:
+    tag: '#010F'
+    ifds:
+      - IFD0
+      - IFD1
+  Model:
+    tag: '#0110'
+    ifds:
+      - IFD0
+      - IFD1
+  StripOffsets:
+    tag: '#0111'
+    ifds:
+      - IFD0
+      - IFD1
+  Orientation:
+    tag: '#0112'
+    ifds:
+      - IFD0
+      - IFD1
+  SamplesPerPixel:
+    tag: '#0115'
+    ifds:
+      - IFD0
+      - IFD1
+  RowsPerStrip:
+    tag: '#0116'
+    ifds:
+      - IFD0
+      - IFD1
+  StripByteCounts:
+    tag: '#0117'
+    ifds:
+      - IFD0
+      - IFD1
+  XResolution:
+    tag: '#011A'
+    ifds:
+      - IFD0
+      - IFD1
+  YResolution:
+    tag: '#011B'
+    ifds:
+      - IFD0
+      - IFD1
+  PlanarConfiguration:
+    tag: '#011C'
+    ifds:
+      - IFD0
+      - IFD1
+  ResolutionUnit:
+    tag: '#0128'
+    ifds:
+      - IFD0
+      - IFD1
+  TransferFunction:
+    tag: '#012D'
+    ifds:
+      - IFD0
+      - IFD1
+  Software:
+    tag: '#0131'
+    ifds:
+      - IFD0
+      - IFD1
+  DateTime:
+    tag: '#0132'
+    ifds:
+      - IFD0
+      - IFD1
+  Artist:
+    tag: '#013B'
+    ifds:
+      - IFD0
+      - IFD1
+  WhitePoint:
+    tag: '#013E'
+    ifds:
+      - IFD0
+      - IFD1
+  PrimaryChromaticities:
+    tag: '#013F'
+    ifds:
+      - IFD0
+      - IFD1
+  TransferRange:
+    tag: '#0156'
+    ifds: {  }
+  JPEGProc:
+    tag: '#0200'
+    ifds: {  }
+  JPEGInterchangeFormat:
+    tag: '#0201'
+    ifds:
+      - IFD0
+      - IFD1
+  JPEGInterchangeFormatLength:
+    tag: '#0202'
+    ifds:
+      - IFD0
+      - IFD1
+  YCbCrCoefficients:
+    tag: '#0211'
+    ifds:
+      - IFD0
+      - IFD1
+  YCbCrSubSampling:
+    tag: '#0212'
+    ifds:
+      - IFD0
+      - IFD1
+  YCbCrPositioning:
+    tag: '#0213'
+    ifds:
+      - IFD0
+      - IFD1
+  ReferenceBlackWhite:
+    tag: '#0214'
+    ifds:
+      - IFD0
+      - IFD1
+  CFARepeatPatternDim:
+    tag: '#828D'
+    ifds: {  }
+  BatteryLevel:
+    tag: '#828F'
+    ifds: {  }
+  Copyright:
+    tag: '#8298'
+    ifds:
+      - IFD0
+      - IFD1
+  ExposureTime:
+    tag: '#829A'
+    ifds:
+      - Exif
+  FNumber:
+    tag: '#829D'
+    ifds:
+      - Exif
+  IPTC/NAA:
+    tag: '#83BB'
+    ifds: {  }
+  ExifIFDPointer:
+    tag: '#8769'
+    ifds:
+      - IFD0
+      - IFD1
+  InterColorProfile:
+    tag: '#8773'
+    ifds: {  }
+  ExposureProgram:
+    tag: '#8822'
+    ifds:
+      - Exif
+  SpectralSensitivity:
+    tag: '#8824'
+    ifds:
+      - Exif
+  GPSInfoIFDPointer:
+    tag: '#8825'
+    ifds:
+      - IFD0
+      - IFD1
+  ISOSpeedRatings:
+    tag: '#8827'
+    ifds:
+      - Exif
+  OECF:
+    tag: '#8828'
+    ifds:
+      - Exif
+  ExifVersion:
+    tag: '#9000'
+    ifds:
+      - Exif
+  DateTimeOriginal:
+    tag: '#9003'
+    ifds:
+      - Exif
+  DateTimeDigitized:
+    tag: '#9004'
+    ifds:
+      - Exif
+  ComponentsConfiguration:
+    tag: '#9101'
+    ifds:
+      - Exif
+  CompressedBitsPerPixel:
+    tag: '#9102'
+    ifds:
+      - Exif
+  ShutterSpeedValue:
+    tag: '#9201'
+    ifds:
+      - Exif
+  ApertureValue:
+    tag: '#9202'
+    ifds:
+      - Exif
+  BrightnessValue:
+    tag: '#9203'
+    ifds:
+      - Exif
+  ExposureBiasValue:
+    tag: '#9204'
+    ifds:
+      - Exif
+  MaxApertureValue:
+    tag: '#9205'
+    ifds:
+      - Exif
+  SubjectDistance:
+    tag: '#9206'
+    ifds:
+      - Exif
+  MeteringMode:
+    tag: '#9207'
+    ifds:
+      - Exif
+  LightSource:
+    tag: '#9208'
+    ifds:
+      - Exif
+  Flash:
+    tag: '#9209'
+    ifds:
+      - Exif
+  FocalLength:
+    tag: '#920A'
+    ifds:
+      - Exif
+  SubjectArea:
+    tag: '#9214'
+    ifds: {  }
+  MakerNote:
+    tag: '#927C'
+    ifds:
+      - Exif
+  UserComment:
+    tag: '#9286'
+    ifds:
+      - Exif
+  SubSecTime:
+    tag: '#9290'
+    ifds:
+      - Exif
+  SubSecTimeOriginal:
+    tag: '#9291'
+    ifds:
+      - Exif
+  SubSecTimeDigitized:
+    tag: '#9292'
+    ifds:
+      - Exif
+  WindowsXPTitle:
+    tag: '#9C9B'
+    ifds:
+      - IFD0
+      - IFD1
+  WindowsXPComment:
+    tag: '#9C9C'
+    ifds:
+      - IFD0
+      - IFD1
+  WindowsXPAuthor:
+    tag: '#9C9D'
+    ifds:
+      - IFD0
+      - IFD1
+  WindowsXPKeywords:
+    tag: '#9C9E'
+    ifds:
+      - IFD0
+      - IFD1
+  WindowsXPSubject:
+    tag: '#9C9F'
+    ifds:
+      - IFD0
+      - IFD1
+  FlashPixVersion:
+    tag: '#A000'
+    ifds:
+      - Exif
+  ColorSpace:
+    tag: '#A001'
+    ifds:
+      - Exif
+  PixelXDimension:
+    tag: '#A002'
+    ifds:
+      - Exif
+  PixelYDimension:
+    tag: '#A003'
+    ifds:
+      - Exif
+  RelatedSoundFile:
+    tag: '#A004'
+    ifds:
+      - Exif
+  InteroperabilityIFDPointer:
+    tag: '#A005'
+    ifds:
+      - Exif
+  FlashEnergy:
+    tag: '#A20B'
+    ifds:
+      - Exif
+  SpatialFrequencyResponse:
+    tag: '#A20C'
+    ifds:
+      - Exif
+  FocalPlaneXResolution:
+    tag: '#A20E'
+    ifds:
+      - Exif
+  FocalPlaneYResolution:
+    tag: '#A20F'
+    ifds:
+      - Exif
+  FocalPlaneResolutionUnit:
+    tag: '#A210'
+    ifds:
+      - Exif
+  SubjectLocation:
+    tag: '#A214'
+    ifds:
+      - Exif
+  ExposureIndex:
+    tag: '#A215'
+    ifds:
+      - Exif
+  SensingMethod:
+    tag: '#A217'
+    ifds:
+      - Exif
+  FileSource:
+    tag: '#A300'
+    ifds:
+      - Exif
+  SceneType:
+    tag: '#A301'
+    ifds:
+      - Exif
+  CFAPattern:
+    tag: '#A302'
+    ifds:
+      - Exif
+  CustomRendered:
+    tag: '#A401'
+    ifds:
+      - Exif
+  ExposureMode:
+    tag: '#A402'
+    ifds:
+      - Exif
+  WhiteBalance:
+    tag: '#A403'
+    ifds:
+      - Exif
+  DigitalZoomRatio:
+    tag: '#A404'
+    ifds:
+      - Exif
+  FocalLengthIn35mmFilm:
+    tag: '#A405'
+    ifds:
+      - Exif
+  SceneCaptureType:
+    tag: '#A406'
+    ifds:
+      - Exif
+  GainControl:
+    tag: '#A407'
+    ifds:
+      - Exif
+  Contrast:
+    tag: '#A408'
+    ifds:
+      - Exif
+  Saturation:
+    tag: '#A409'
+    ifds:
+      - Exif
+  Sharpness:
+    tag: '#A40A'
+    ifds:
+      - Exif
+  DeviceSettingDescription:
+    tag: '#A40B'
+    ifds:
+      - Exif
+  SubjectDistanceRange:
+    tag: '#A40C'
+    ifds:
+      - Exif
+  ImageUniqueID:
+    tag: '#A420'
+    ifds:
+      - Exif
+  Gamma:
+    tag: '#A500'
+    ifds:
+      - Exif
+  PrintIM:
+    tag: '#C4A5'
+    ifds:
+      - IFD0
+      - IFD1
+  InteroperabilityIndex:
+    tag: '#0001'
+    ifds:
+      - Interoperability
+  InteroperabilityVersion:
+    tag: '#0002'
+    ifds:
+      - Interoperability
+  RelatedImageFileFormat:
+    tag: '#1000'
+    ifds:
+      - Interoperability
+  RelatedImageWidth:
+    tag: '#1001'
+    ifds:
+      - Interoperability
+  RelatedImageLength:
+    tag: '#1002'
+    ifds:
+      - Interoperability
+  GPSVersionID:
+    tag: '#0000'
+    ifds:
+      - GPS
+  GPSLatitudeRef:
+    tag: '#0001'
+    ifds:
+      - GPS
+  GPSLatitude:
+    tag: '#0002'
+    ifds:
+      - GPS
+  GPSLongitudeRef:
+    tag: '#0003'
+    ifds:
+      - GPS
+  GPSLongitude:
+    tag: '#0004'
+    ifds:
+      - GPS
+  GPSAltitudeRef:
+    tag: '#0005'
+    ifds:
+      - GPS
+  GPSAltitude:
+    tag: '#0006'
+    ifds:
+      - GPS
+  GPSTimeStamp:
+    tag: '#0007'
+    ifds:
+      - GPS
+  GPSSatellites:
+    tag: '#0008'
+    ifds:
+      - GPS
+  GPSStatus:
+    tag: '#0009'
+    ifds:
+      - GPS
+  GPSMeasureMode:
+    tag: '#000A'
+    ifds:
+      - GPS
+  GPSDOP:
+    tag: '#000B'
+    ifds:
+      - GPS
+  GPSSpeedRef:
+    tag: '#000C'
+    ifds:
+      - GPS
+  GPSSpeed:
+    tag: '#000D'
+    ifds:
+      - GPS
+  GPSTrackRef:
+    tag: '#000E'
+    ifds:
+      - GPS
+  GPSTrack:
+    tag: '#000F'
+    ifds:
+      - GPS
+  GPSImgDirectionRef:
+    tag: '#0010'
+    ifds:
+      - GPS
+  GPSImgDirection:
+    tag: '#0011'
+    ifds:
+      - GPS
+  GPSMapDatum:
+    tag: '#0012'
+    ifds:
+      - GPS
+  GPSDestLatitudeRef:
+    tag: '#0013'
+    ifds:
+      - GPS
+  GPSDestLatitude:
+    tag: '#0014'
+    ifds:
+      - GPS
+  GPSDestLongitudeRef:
+    tag: '#0015'
+    ifds:
+      - GPS
+  GPSDestLongitude:
+    tag: '#0016'
+    ifds:
+      - GPS
+  GPSDestBearingRef:
+    tag: '#0017'
+    ifds:
+      - GPS
+  GPSDestBearing:
+    tag: '#0018'
+    ifds:
+      - GPS
+  GPSDestDistanceRef:
+    tag: '#0019'
+    ifds:
+      - GPS
+  GPSDestDistance:
+    tag: '#001A'
+    ifds:
+      - GPS
+  GPSProcessingMethod:
+    tag: '#001B'
+    ifds:
+      - GPS
+  GPSAreaInformation:
+    tag: '#001C'
+    ifds:
+      - GPS
+  GPSDateStamp:
+    tag: '#001D'
+    ifds:
+      - GPS
+  GPSDifferential:
+    tag: '#001E'
+    ifds:
+      - GPS
