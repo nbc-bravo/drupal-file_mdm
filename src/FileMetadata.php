@@ -69,9 +69,6 @@ class FileMetadata { // @todo implements
    */
   public function setLocalTempPath($path) {
     $this->localTempPath = $path;
-    foreach ($this->plugins as $plugin) {
-      $plugin->setUri($this->localTempPath);
-    }
     return $this;
   }
 

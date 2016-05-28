@@ -33,14 +33,14 @@ class FileMetadataManagerTest extends WebTestBase {
       [
         // Pass a path instead of the URI.
         'uri' => drupal_get_path('module', 'file_mdm_exif') . '/tests/files/test-exif.jpeg',
-        'count' => 80,
+        'count' => 48,
         'Orientation' => 8,
         'ShutterSpeedValue' => [106, 32],
       ],
       [
         // Pass a URI.
         'uri' => 'public://test-exif.jpeg',
-        'count' => 80,
+        'count' => 48,
         'Orientation' => 8,
         'ShutterSpeedValue' => [106, 32],
       ],
@@ -48,7 +48,7 @@ class FileMetadataManagerTest extends WebTestBase {
         // Remote storage file. Pass the path to a local copy of the file.
         'uri' => 'dummy-remote://test-exif.jpeg',
         'local_path' => $this->container->get('file_system')->realpath('temporary://test-exif.jpeg'),
-        'count' => 80,
+        'count' => 48,
         'Orientation' => 8,
         'ShutterSpeedValue' => [106, 32],
       ],
@@ -72,7 +72,7 @@ class FileMetadataManagerTest extends WebTestBase {
       if (isset($image_file['local_path'])) {
         $file_metadata->setLocalTempPath($image_file['local_path']);
       }
-      //$this->assertEqual($image_file['count'], count($file_metadata->getMetadata('exif')));
+      $this->assertEqual($image_file['count'], $this->countMetadataKeys($file_metadata, 'exif'));
       if (isset($image_file['Orientation'])) {
         $entry = $file_metadata->getMetadata('exif', 'Orientation');
         $this->assertEqual($image_file['Orientation'], $entry ? $entry->getValue() : NULL);
@@ -88,13 +88,27 @@ class FileMetadataManagerTest extends WebTestBase {
     $metadata = $file_metadata_from->getMetadata('exif');
     $new_file_metadata = $fmdm->useUri('public://test-output.jpeg');
     $new_file_metadata->loadMetadata('exif', $metadata);
-    //$this->assertEqual($image_files[0]['count'], count($new_file_metadata->getMetadata('exif')));
+    $this->assertEqual($image_files[0]['count'], $this->countMetadataKeys($new_file_metadata, 'exif'));
     $this->assertEqual($image_files[0]['Orientation'], $new_file_metadata->getMetadata('exif', 'Orientation')->getValue());
     $this->assertEqual($image_files[0]['ShutterSpeedValue'], $new_file_metadata->getMetadata('exif', 'ShutterSpeedValue')->getValue());
 
 
     $fmdm->debugDumpHashes();
 
+  }
+
+  /**
+   * @todo
+   */
+  protected function countMetadataKeys($file_metadata, $metadata_id, $options = NULL) {
+    $supported_keys = $file_metadata->getSupportedKeys($metadata_id, $options);
+    $keys = 0;
+    foreach ($supported_keys as $key) {
+      if ($entry = $file_metadata->getMetadata($metadata_id , $key)) {
+        $keys++;
+      }
+    }
+    return $keys;
   }
 
 }
