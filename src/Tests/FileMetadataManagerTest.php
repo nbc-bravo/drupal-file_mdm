@@ -26,34 +26,33 @@ class FileMetadataManagerTest extends WebTestBase {
   public function testExifPlugin() {
     // Prepare a copy of test files.
     $this->drupalGetTestFiles('image');
-    file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'public://', FILE_EXISTS_REPLACE);
-    file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'temporary://', FILE_EXISTS_REPLACE);
+    file_unmanaged_copy(drupal_get_path('module', 'file_mdm_exif') . '/tests/files/test-exif.jpeg', 'public://', FILE_EXISTS_REPLACE);
+    file_unmanaged_copy(drupal_get_path('module', 'file_mdm_exif') . '/tests/files/test-exif.jpeg', 'temporary://', FILE_EXISTS_REPLACE);
     // The image files that will be tested.
     $image_files = [
       [
         // Pass a path instead of the URI.
-        'uri' => drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg',
+        'uri' => drupal_get_path('module', 'file_mdm_exif') . '/tests/files/test-exif.jpeg',
         'count' => 80,
         'Orientation' => 8,
-        'ShutterSpeedValue' => '106/32',
+        'ShutterSpeedValue' => [106, 32],
       ],
-/*      [
+      [
         // Pass a URI.
         'uri' => 'public://test-exif.jpeg',
         'count' => 80,
         'Orientation' => 8,
-        'ShutterSpeedValue' => '106/32',
+        'ShutterSpeedValue' => [106, 32],
       ],
       [
-        // exif_read_data cannot read remote stream wrappers. Pass the path to
-        // the local copy of the file.
+        // Remote storage file. Pass the path to a local copy of the file.
         'uri' => 'dummy-remote://test-exif.jpeg',
         'local_path' => $this->container->get('file_system')->realpath('temporary://test-exif.jpeg'),
         'count' => 80,
         'Orientation' => 8,
-        'ShutterSpeedValue' => '106/32',
+        'ShutterSpeedValue' => [106, 32],
       ],
-      [
+ /*     [
         // Image with no EXIF data. Still, exif_read_data returns some info.
         'uri' => 'public://image-test.jpg',
         'count' => 7,
@@ -62,7 +61,7 @@ class FileMetadataManagerTest extends WebTestBase {
         // PNG should not reach exif_read_data.
         'uri' => 'public://image-test.png',
         'count' => 0,
-      ],*/
+      ],  */
     ];
 
     $fmdm = $this->container->get('file_metadata_manager');
@@ -73,21 +72,25 @@ class FileMetadataManagerTest extends WebTestBase {
       if (isset($image_file['local_path'])) {
         $file_metadata->setLocalTempPath($image_file['local_path']);
       }
-      $X = $file_metadata->getMetadata('exif', ['IFD0', 'Make']);
-      debug($X->getValue());
       //$this->assertEqual($image_file['count'], count($file_metadata->getMetadata('exif')));
- /*     $this->assertIdentical(isset($image_file['Orientation']) ? $image_file['Orientation'] : NULL, $file_metadata->getMetadata('exif', 'Orientation')->getValue());
- /*     $this->assertIdentical(isset($image_file['ShutterSpeedValue']) ? $image_file['ShutterSpeedValue'] : NULL, $file_metadata->getMetadata('exif', 'ShutterSpeedValue')->getValue());*/
+      if (isset($image_file['Orientation'])) {
+        $entry = $file_metadata->getMetadata('exif', 'Orientation');
+        $this->assertEqual($image_file['Orientation'], $entry ? $entry->getValue() : NULL);
+      }
+      if (isset($image_file['ShutterSpeedValue'])) {
+        $entry = $file_metadata->getMetadata('exif', 'ShutterSpeedValue');
+        $this->assertEqual($image_file['ShutterSpeedValue'], $entry ? $entry->getValue() : NULL);
+      }
     }
 
-    // Test setting metadata to an in-memory object.
-    /*$file_metadata_from = $fmdm->useUri($image_files[0]['uri']);
+    // Test loading metadata from an in-memory object.
+    $file_metadata_from = $fmdm->useUri($image_files[0]['uri']);
     $metadata = $file_metadata_from->getMetadata('exif');
     $new_file_metadata = $fmdm->useUri('public://test-output.jpeg');
     $new_file_metadata->loadMetadata('exif', $metadata);
-    $this->assertEqual($image_files[0]['count'], count($new_file_metadata->getMetadata('exif')));
-    $this->assertIdentical($image_files[0]['Orientation'], $new_file_metadata->getMetadata('exif', 'Orientation'));
-    $this->assertIdentical($image_files[0]['ShutterSpeedValue'], $new_file_metadata->getMetadata('exif', 'ShutterSpeedValue'));*/
+    //$this->assertEqual($image_files[0]['count'], count($new_file_metadata->getMetadata('exif')));
+    $this->assertEqual($image_files[0]['Orientation'], $new_file_metadata->getMetadata('exif', 'Orientation')->getValue());
+    $this->assertEqual($image_files[0]['ShutterSpeedValue'], $new_file_metadata->getMetadata('exif', 'ShutterSpeedValue')->getValue());
 
 
     $fmdm->debugDumpHashes();

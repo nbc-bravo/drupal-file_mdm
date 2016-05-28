@@ -53,8 +53,7 @@ class ExifTagMapper {  // @todo implements
       throw new \RuntimeException('No key passed');
     }
     if (is_string($key)) {
-      $tag = $this->stringToTag($key);
-      if (!$tag[0]) {
+      if (!$tag = $this->stringToTag($key)) {
         throw new \RuntimeException("No default ifd available for '{$key}'");
       }
       return ['ifd' => $tag[0], 'tag' => $tag[1]];
@@ -129,8 +128,9 @@ class ExifTagMapper {  // @todo implements
 
   protected function stringToTag($value) {
     $v = strtolower($value);
-    if (isset($this->getStringToTagMap()[$v])) {
-      return $this->getStringToTagMap()[$v];
+    $tag = isset($this->getStringToTagMap()[$v]) ? $this->getStringToTagMap()[$v] : NULL;
+    if ($tag) {
+      return [$this->stringToIfd($tag[0]), $tag[1]];
     }
     throw new \RuntimeException("No Exif tag found for '{$value}'");
   }
