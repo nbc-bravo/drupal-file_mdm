@@ -115,14 +115,14 @@ class ExifTagMapper {  // @todo implements
 
   protected function getSupportedKeysMap() {
     if (!$this->supportedKeysMap) {
-      $config_map = $this->configFactory->get('file_mdm_exif.settings')->get('tag_map');
       $this->supportedKeysMap = [];
-      foreach ($config_map as $key => $value) {
-        foreach ($value['ifds'] as $ifd) {
-          $this->supportedKeysMap[] = [$ifd, $key];
+      foreach ($this->getSupportedIfdsMap() as $ifd) {
+        $ifd_obj = new PelIfd($ifd[1]);
+        $valid_tags = $ifd_obj->getValidTags();
+        foreach ($valid_tags as $tag) {
+          $this->supportedKeysMap[] = [$ifd[0], PelTag::getName($ifd[1], $tag)];
         }
       }
-kint($this->supportedKeysMap);
     }
     return $this->supportedKeysMap;
   }
