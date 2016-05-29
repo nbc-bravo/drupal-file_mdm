@@ -1,12 +1,14 @@
 ifd_map:
-  IFD0:
+  0:
     type: 0
     aliases:
+      - 0
       - IFD0
       - Main
-  IFD1:
+  1:
     type: 1
     aliases:
+      - 1
       - IFD1
       - Thumbnail
   Exif:
@@ -26,28 +28,28 @@ tag_map:
   ImageWidth:
     tag: '#0100'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   ImageLength:
     tag: '#0101'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   BitsPerSample:
     tag: '#0102'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   Compression:
     tag: '#0103'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   PhotometricInterpretation:
     tag: '#0106'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   FillOrder:
     tag: '#010A'
     ifds: {  }
@@ -57,93 +59,93 @@ tag_map:
   ImageDescription:
     tag: '#010E'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   Make:
     tag: '#010F'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   Model:
     tag: '#0110'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   StripOffsets:
     tag: '#0111'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   Orientation:
     tag: '#0112'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   SamplesPerPixel:
     tag: '#0115'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   RowsPerStrip:
     tag: '#0116'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   StripByteCounts:
     tag: '#0117'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   XResolution:
     tag: '#011A'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   YResolution:
     tag: '#011B'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   PlanarConfiguration:
     tag: '#011C'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   ResolutionUnit:
     tag: '#0128'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   TransferFunction:
     tag: '#012D'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   Software:
     tag: '#0131'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   DateTime:
     tag: '#0132'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   Artist:
     tag: '#013B'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   WhitePoint:
     tag: '#013E'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   PrimaryChromaticities:
     tag: '#013F'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   TransferRange:
     tag: '#0156'
     ifds: {  }
@@ -153,33 +155,33 @@ tag_map:
   JPEGInterchangeFormat:
     tag: '#0201'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   JPEGInterchangeFormatLength:
     tag: '#0202'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   YCbCrCoefficients:
     tag: '#0211'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   YCbCrSubSampling:
     tag: '#0212'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   YCbCrPositioning:
     tag: '#0213'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   ReferenceBlackWhite:
     tag: '#0214'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   CFARepeatPatternDim:
     tag: '#828D'
     ifds: {  }
@@ -189,8 +191,8 @@ tag_map:
   Copyright:
     tag: '#8298'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   ExposureTime:
     tag: '#829A'
     ifds:
@@ -205,8 +207,8 @@ tag_map:
   ExifIFDPointer:
     tag: '#8769'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   InterColorProfile:
     tag: '#8773'
     ifds: {  }
@@ -221,8 +223,8 @@ tag_map:
   GPSInfoIFDPointer:
     tag: '#8825'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   ISOSpeedRatings:
     tag: '#8827'
     ifds:
@@ -317,28 +319,28 @@ tag_map:
   WindowsXPTitle:
     tag: '#9C9B'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   WindowsXPComment:
     tag: '#9C9C'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   WindowsXPAuthor:
     tag: '#9C9D'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   WindowsXPKeywords:
     tag: '#9C9E'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   WindowsXPSubject:
     tag: '#9C9F'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   FlashPixVersion:
     tag: '#A000'
     ifds:
@@ -466,8 +468,8 @@ tag_map:
   PrintIM:
     tag: '#C4A5'
     ifds:
-      - IFD0
-      - IFD1
+      - '0'
+      - '1'
   InteroperabilityIndex:
     tag: '#0001'
     ifds:

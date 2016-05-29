@@ -104,10 +104,10 @@ class ExifTagMapper {  // @todo implements
 
   protected function getSupportedIfdsMap() {
     if (!$this->supportedIfdsMap) {
-      $config_map = $this->configFactory->get('file_mdm_exif.settings')->get('ifd_map');
       $this->supportedIfdsMap = [];
-      foreach ($config_map as $key => $value) {
-        $this->supportedIfdsMap[] = [$key, $value['type']];
+      foreach ([PelIfd::IFD0, PelIfd::IFD1, PelIfd::EXIF, PelIfd::GPS, PelIfd::INTEROPERABILITY] as $type) {
+        $ifd = new PelIfd($type);
+        $this->supportedIfdsMap[] = [PelIfd::getTypeName($type), $type];
       }
     }
     return $this->supportedIfdsMap;
@@ -122,6 +122,7 @@ class ExifTagMapper {  // @todo implements
           $this->supportedKeysMap[] = [$ifd, $key];
         }
       }
+kint($this->supportedKeysMap);
     }
     return $this->supportedKeysMap;
   }
@@ -144,6 +145,7 @@ class ExifTagMapper {  // @todo implements
         $hex = substr($value['tag'], 1, 4);
         $this->stringToTagMap[$k] = [isset($value['ifds'][0]) ? $value['ifds'][0] : NULL, hexdec($hex)];
       }
+kint($this->stringToTagMap);
     }
     return $this->stringToTagMap;
   }
