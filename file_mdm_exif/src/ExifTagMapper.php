@@ -63,11 +63,11 @@ class ExifTagMapper {  // @todo implements
         throw new \RuntimeException("Invalid Exif tag specified");
       }
       // Deal with ifd.
-      if (is_string($key[0])) {
-        $ifd = $this->stringToIfd($key[0]);
-      }
-      elseif (is_int($key[0])) {
+      if (is_int($key[0])) {
         $ifd = $key[0];
+      }
+      elseif (is_string($key[0])) {
+        $ifd = $this->stringToIfd($key[0]);
       }
       else {
         throw new \RuntimeException("Invalid Ifd specified");
@@ -138,19 +138,22 @@ class ExifTagMapper {  // @todo implements
 
   protected function getStringToTagMap() {
     if (!$this->stringToTagMap) {
-      $config_map = $this->configFactory->get('file_mdm_exif.settings')->get('tag_map');
-      $this->stringToTagMap = [];
-      foreach ($config_map as $key => $value) {
-        $k = strtolower($key);
-        $hex = substr($value['tag'], 1, 4);
-        $this->stringToTagMap[$k] = [isset($value['ifds'][0]) ? $value['ifds'][0] : NULL, hexdec($hex)];
+      foreach ($this->getSupportedIfdsMap() as $ifd) {
+        $ifd_obj = new PelIfd($ifd[1]);
+        $valid_tags = $ifd_obj->getValidTags();
+        foreach ($valid_tags as $tag) {
+          $tag_name = strtolower(PelTag::getName($ifd[1], $tag));
+          if (!isset($this->stringToTagMap[$tag_name])) {
+            $this->stringToTagMap[$tag_name] = [$ifd[1], $tag];
+          }
+        }
       }
-kint($this->stringToTagMap);
     }
     return $this->stringToTagMap;
   }
 
   protected function stringToIfd($value) {
+kint($value);
     $v = strtolower($value);
     if (isset($this->getStringToIfdMap()[$v])) {
       return $this->getStringToIfdMap()[$v];
