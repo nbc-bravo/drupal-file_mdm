@@ -131,7 +131,7 @@ class ExifTagMapper {  // @todo implements
     $v = strtolower($value);
     $tag = isset($this->getStringToTagMap()[$v]) ? $this->getStringToTagMap()[$v] : NULL;
     if ($tag) {
-      return [$this->stringToIfd($tag[0]), $tag[1]];
+      return $tag;
     }
     throw new \RuntimeException("No Exif tag found for '{$value}'");
   }
@@ -153,7 +153,6 @@ class ExifTagMapper {  // @todo implements
   }
 
   protected function stringToIfd($value) {
-kint($value);
     $v = strtolower($value);
     if (isset($this->getStringToIfdMap()[$v])) {
       return $this->getStringToIfdMap()[$v];
