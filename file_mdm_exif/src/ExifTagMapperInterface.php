@@ -11,7 +11,7 @@ interface ExifTagMapperInterface {
    * Resolves a metadata 'key' to the default EXIF IFD and TAG.
    *
    * @param string|array $key
-   *   A metadata 'key' as passed in by the file metadata manager. Can be a
+   *   A metadata 'key' as passed in by the file metadata manager. It can be a
    *   string, in which case the default IFD and TAG are returned. If it is an
    *   array, then the first and the second array elements define respectively
    *   the IFD and the TAG requested. IFD and TAG can be strings, in which case

@@ -36,9 +36,41 @@ class ExifTagMapper implements ExifTagMapperInterface {
    */
   protected $configFactory;
 
+  /**
+   * The string to IFD map.
+   *
+   * Maps IFDs or their aliases expressed as literals to the EXIF integer
+   * identifier.
+   *
+   * @var array
+   */
   protected $stringToIfdMap;
+
+  /**
+   * The string to TAG map.
+   *
+   * Maps TAGs expressed as literals to the EXIF integer IFD/TAG identifiers.
+   *
+   * @var array
+   */
   protected $stringToTagMap;
+
+  /**
+   * The supported metadata 'keys'.
+   *
+   * A simple array of IFD/TAG combinations, expressed as literals.
+   *
+   * @var array
+   */
   protected $supportedKeysMap;
+
+  /**
+   * The supported IFDs.
+   *
+   * A simple array of IFDs, expressed as literal/integer combinations.
+   *
+   * @var array
+   */
   protected $supportedIfdsMap;
 
   /**
@@ -114,6 +146,14 @@ class ExifTagMapper implements ExifTagMapperInterface {
     }
   }
 
+  /**
+   * Returns the list of supported IFDs.
+   *
+   * Builds and caches the list as needed.
+   *
+   * @return array
+   *   A simple array of IFDs, expressed as literal/integer combinations.
+   */
   protected function getSupportedIfdsMap() {
     if (!$this->supportedIfdsMap) {
       $cache_id = 'supportedIfds';
@@ -132,6 +172,14 @@ class ExifTagMapper implements ExifTagMapperInterface {
     return $this->supportedIfdsMap;
   }
 
+  /**
+   * Returns the list of supported metadata 'keys'.
+   *
+   * Builds and caches the list as needed.
+   *
+   * @return array
+   *   A simple array of IFD/TAG combinations, expressed as literals.
+   */
   protected function getSupportedKeysMap() {
     if (!$this->supportedKeysMap) {
       $cache_id = 'supportedKeys';
@@ -153,6 +201,18 @@ class ExifTagMapper implements ExifTagMapperInterface {
     return $this->supportedKeysMap;
   }
 
+  /**
+   * Returns the IFD/TAG integers for a TAG literal.
+   *
+   * @param string $value
+   *   A TAG literal.
+   *
+   * @return array
+   *   A simple array of with IFD and TAG, expressed as integers.
+   *
+   * @throws \RuntimeException  // @todo change exception type
+   *   When the IFD/TAG combination could not be found.
+   */
   protected function stringToTag($value) {
     $v = strtolower($value);
     $tag = isset($this->getStringToTagMap()[$v]) ? $this->getStringToTagMap()[$v] : NULL;
@@ -162,6 +222,15 @@ class ExifTagMapper implements ExifTagMapperInterface {
     throw new \RuntimeException("No Exif tag found for '{$value}'");
   }
 
+  /**
+   * Returns the map of TAG strings to IFD/TAG integers.
+   *
+   * Builds and caches the list as needed.
+   *
+   * @return array
+   *   An associative array where keys are TAG literals, and values a simple
+   *   array of IFD/TAG integer identifiers.
+   */
   protected function getStringToTagMap() {
     if (!$this->stringToTagMap) {
       $cache_id = 'stringToTag';
@@ -185,6 +254,18 @@ class ExifTagMapper implements ExifTagMapperInterface {
     return $this->stringToTagMap;
   }
 
+  /**
+   * Returns the IFD integer for an IFD literal.
+   *
+   * @param string $value
+   *   An IFD literal.
+   *
+   * @return int
+   *   The IFD identifier.
+   *
+   * @throws \RuntimeException  // @todo change exception type
+   *   When the IFD could not be found.
+   */
   protected function stringToIfd($value) {
     $v = strtolower($value);
     if (isset($this->getStringToIfdMap()[$v])) {
@@ -193,6 +274,15 @@ class ExifTagMapper implements ExifTagMapperInterface {
     throw new \RuntimeException("Invalid Ifd '{$value}' specified");
   }
 
+  /**
+   * Returns the map of IFD strings to IFD integers.
+   *
+   * Builds and caches the list as needed.
+   *
+   * @return array
+   *   An associative array where keys are IFD literals, and values the IFD
+   *   integer identifiers.
+   */
   protected function getStringToIfdMap() {
     if (!$this->stringToIfdMap) {
       $cache_id = 'stringToIfd';
@@ -214,6 +304,15 @@ class ExifTagMapper implements ExifTagMapperInterface {
     return $this->stringToIfdMap;
   }
 
+  /**
+   * Gets a cache entry.
+   *
+   * @param string $id
+   *   The cache id to get.
+   *
+   * @return object|null
+   *   The cache item or NULL on failure.
+   */
   protected function getCache($id) {
     if ($cache = $this->cache->get("file_mdm_exif:{$id}")) {
       return $cache;
@@ -223,6 +322,16 @@ class ExifTagMapper implements ExifTagMapperInterface {
     }
   }
 
+  /**
+   * Sets a cache entry.
+   *
+   * @param string $id
+   *   The cache id to set.
+   * @param mixed $value
+   *   The value to cache.
+   *
+   * @return $this
+   */
   protected function setCache($id, $value) {
     $config = $this->configFactory->get('file_mdm_exif.settings');
     $this->cache->set("file_mdm_exif:{$id}", $value, Cache::PERMANENT, $config->getCacheTags());
