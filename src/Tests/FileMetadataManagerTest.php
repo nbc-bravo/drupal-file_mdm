@@ -52,16 +52,16 @@ class FileMetadataManagerTest extends WebTestBase {
         'Orientation' => 8,
         'ShutterSpeedValue' => [106, 32],
       ],
- /*     [
-        // Image with no EXIF data. Still, exif_read_data returns some info.
+      [
+        // Image with no EXIF data.
         'uri' => 'public://image-test.jpg',
-        'count' => 7,
+        'count' => 0,
       ],
       [
-        // PNG should not reach exif_read_data.
+        // PNG should not have any data.
         'uri' => 'public://image-test.png',
         'count' => 0,
-      ],  */
+      ],
     ];
 
     $fmdm = $this->container->get('file_metadata_manager');

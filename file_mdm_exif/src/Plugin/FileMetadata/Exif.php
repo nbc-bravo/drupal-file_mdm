@@ -99,7 +99,14 @@ class Exif extends FileMetadataPluginBase {
     }
     else {
       $ifd_tag = $this->tagMapper->resolveKeyToIfdAndTag($key);
-      $ifd = $this->metadata->getTiff()->getIfd();
+      if (!$this->metadata) {
+        return NULL;
+      }
+      $tiff = $this->metadata->getTiff();
+      if ($tiff === NULL) {
+        return NULL;
+      }
+      $ifd = $tiff->getIfd();
       if ($ifd === NULL) {
         return NULL;
       }
