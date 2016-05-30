@@ -8,6 +8,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use lsolesen\pel\PelIfd;
 use lsolesen\pel\PelJpeg;
+use lsolesen\pel\PelTiff;
 
 /**
  * FileMetadata plugin for EXIF.
@@ -75,12 +76,27 @@ class Exif extends FileMetadataPluginBase {
       throw new \RuntimeException("Cannot read file at '{$this->getUri()}'");
     }
     $this->readFromFile = TRUE;
-    if (!in_array($this->mimeTypeGuesser->guess($this->getUri()), ['image/jpeg', 'image/tiff'])) {
-      // File does not support EXIF.
-      return FALSE;
+    switch ($this->mimeTypeGuesser->guess($this->getUri())) {
+      case 'image/jpeg':
+        $jpeg = new PelJpeg($this->getUri());
+        if ($jpeg !== NULL && ($exif = $jpeg->getExif())) {
+          if (($tiff = $exif->getTiff()) !== NULL) {
+            $this->metadata = $tiff;
+          }
+        }
+        break;
+
+      case 'image/tiff':
+        $tiff = new PelTiff($this->getUri());
+        if ($tiff !== NULL) {
+          $this->metadata = $tiff;
+        }
+        break;
+
+      default:
+        break;
+
     }
-    $jpeg = new PelJpeg($this->getUri());
-    $this->metadata = $jpeg->getExif();
     $this->hasMetadataChanged = FALSE;
     return (bool) $this->metadata;
   }
@@ -97,11 +113,7 @@ class Exif extends FileMetadataPluginBase {
       if (!$this->metadata) {
         return NULL;
       }
-      $tiff = $this->metadata->getTiff();
-      if ($tiff === NULL) {
-        return NULL;
-      }
-      $ifd = $tiff->getIfd();
+      $ifd = $this->metadata->getIfd();
       if ($ifd === NULL) {
         return NULL;
       }
