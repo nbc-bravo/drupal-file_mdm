@@ -2,6 +2,8 @@
 
 namespace Drupal\file_mdm_exif;
 
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Psr\Log\LoggerInterface;
 use lsolesen\pel\PelIfd;
@@ -9,9 +11,16 @@ use lsolesen\pel\PelJpeg;
 use lsolesen\pel\PelTag;
 
 /**
- * @todo
+ * Provides a mapping service for EXIF ifds and tags.
  */
 class ExifTagMapper {  // @todo implements
+
+  /**
+   * The cache service.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  protected $cache;
 
   /**
    * The file_mdm logger.
@@ -39,10 +48,13 @@ class ExifTagMapper {  // @todo implements
    *   The file_mdm logger.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_service
+   *   The cache service.
    */
-  public function __construct(LoggerInterface $logger, ConfigFactoryInterface $config_factory) {
+  public function __construct(LoggerInterface $logger, ConfigFactoryInterface $config_factory, CacheBackendInterface $cache_service) {
     $this->logger = $logger;
     $this->configFactory = $config_factory;
+    $this->cache = $cache_service;
   }
 
   /**
@@ -87,6 +99,9 @@ class ExifTagMapper {  // @todo implements
     throw new \RuntimeException('Invalid key passed');
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getSupportedKeys($options = NULL) {
     if ($options !== NULL && !is_array($options)) {
       throw new \RuntimeException('Invalid options passed to getSupportedKeys');
@@ -104,10 +119,17 @@ class ExifTagMapper {  // @todo implements
 
   protected function getSupportedIfdsMap() {
     if (!$this->supportedIfdsMap) {
-      $this->supportedIfdsMap = [];
-      foreach ([PelIfd::IFD0, PelIfd::IFD1, PelIfd::EXIF, PelIfd::GPS, PelIfd::INTEROPERABILITY] as $type) {
-        $ifd = new PelIfd($type);
-        $this->supportedIfdsMap[] = [PelIfd::getTypeName($type), $type];
+      $cache_id = 'supportedIfds';
+      if ($cache = $this->getCache($cache_id)) {
+        $this->supportedIfdsMap = $cache->data;
+      }
+      else {
+        $this->supportedIfdsMap = [];
+        foreach ([PelIfd::IFD0, PelIfd::IFD1, PelIfd::EXIF, PelIfd::GPS, PelIfd::INTEROPERABILITY] as $type) {
+          $ifd = new PelIfd($type);
+          $this->supportedIfdsMap[] = [PelIfd::getTypeName($type), $type];
+        }
+        $this->setCache($cache_id, $this->supportedIfdsMap);
       }
     }
     return $this->supportedIfdsMap;
@@ -115,13 +137,20 @@ class ExifTagMapper {  // @todo implements
 
   protected function getSupportedKeysMap() {
     if (!$this->supportedKeysMap) {
-      $this->supportedKeysMap = [];
-      foreach ($this->getSupportedIfdsMap() as $ifd) {
-        $ifd_obj = new PelIfd($ifd[1]);
-        $valid_tags = $ifd_obj->getValidTags();
-        foreach ($valid_tags as $tag) {
-          $this->supportedKeysMap[] = [$ifd[0], PelTag::getName($ifd[1], $tag)];
+      $cache_id = 'supportedKeys';
+      if ($cache = $this->getCache($cache_id)) {
+        $this->supportedKeysMap = $cache->data;
+      }
+      else {
+        $this->supportedKeysMap = [];
+        foreach ($this->getSupportedIfdsMap() as $ifd) {
+          $ifd_obj = new PelIfd($ifd[1]);
+          $valid_tags = $ifd_obj->getValidTags();
+          foreach ($valid_tags as $tag) {
+            $this->supportedKeysMap[] = [$ifd[0], PelTag::getName($ifd[1], $tag)];
+          }
         }
+        $this->setCache($cache_id, $this->supportedKeysMap);
       }
     }
     return $this->supportedKeysMap;
@@ -138,15 +167,22 @@ class ExifTagMapper {  // @todo implements
 
   protected function getStringToTagMap() {
     if (!$this->stringToTagMap) {
-      foreach ($this->getSupportedIfdsMap() as $ifd) {
-        $ifd_obj = new PelIfd($ifd[1]);
-        $valid_tags = $ifd_obj->getValidTags();
-        foreach ($valid_tags as $tag) {
-          $tag_name = strtolower(PelTag::getName($ifd[1], $tag));
-          if (!isset($this->stringToTagMap[$tag_name])) {
-            $this->stringToTagMap[$tag_name] = [$ifd[1], $tag];
+      $cache_id = 'stringToTag';
+      if ($cache = $this->getCache($cache_id)) {
+        $this->stringToTagMap = $cache->data;
+      }
+      else {
+        foreach ($this->getSupportedIfdsMap() as $ifd) {
+          $ifd_obj = new PelIfd($ifd[1]);
+          $valid_tags = $ifd_obj->getValidTags();
+          foreach ($valid_tags as $tag) {
+            $tag_name = strtolower(PelTag::getName($ifd[1], $tag));
+            if (!isset($this->stringToTagMap[$tag_name])) {
+              $this->stringToTagMap[$tag_name] = [$ifd[1], $tag];
+            }
           }
         }
+        $this->setCache($cache_id, $this->stringToTagMap);
       }
     }
     return $this->stringToTagMap;
@@ -162,16 +198,38 @@ class ExifTagMapper {  // @todo implements
 
   protected function getStringToIfdMap() {
     if (!$this->stringToIfdMap) {
-      $config_map = $this->configFactory->get('file_mdm_exif.settings')->get('ifd_map');
-      $this->stringToIfdMap = [];
-      foreach ($config_map as $key => $value) {
-        foreach ($value['aliases'] as $alias) {
-          $k = strtolower($alias);
-          $this->stringToIfdMap[$k] = $value['type'];
+      $cache_id = 'stringToIfd';
+      if ($cache = $this->getCache($cache_id)) {
+        $this->stringToIfdMap = $cache->data;
+      }
+      else {
+        $config_map = $this->configFactory->get('file_mdm_exif.settings')->get('ifd_map');
+        $this->stringToIfdMap = [];
+        foreach ($config_map as $key => $value) {
+          foreach ($value['aliases'] as $alias) {
+            $k = strtolower($alias);
+            $this->stringToIfdMap[$k] = $value['type'];
+          }
         }
+        $this->setCache($cache_id, $this->stringToIfdMap);
       }
     }
     return $this->stringToIfdMap;
+  }
+
+  protected function getCache($id) {
+    if ($cache = $this->cache->get("file_mdm_exif:{$id}")) {
+      return $cache;
+    }
+    else {
+      return NULL;
+    }
+  }
+
+  protected function setCache($id, $value) {
+    $config = $this->configFactory->get('file_mdm_exif.settings');
+    $this->cache->set("file_mdm_exif:{$id}", $value, Cache::PERMANENT, $config->getCacheTags());
+    return $this;
   }
 
 }
