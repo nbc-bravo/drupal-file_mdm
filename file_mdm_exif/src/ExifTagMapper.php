@@ -13,7 +13,7 @@ use lsolesen\pel\PelTag;
 /**
  * Provides a mapping service for EXIF ifds and tags.
  */
-class ExifTagMapper {  // @todo implements
+class ExifTagMapper implements ExifTagMapperInterface {
 
   /**
    * The cache service.
@@ -102,10 +102,7 @@ class ExifTagMapper {  // @todo implements
   /**
    * {@inheritdoc}
    */
-  public function getSupportedKeys($options = NULL) {
-    if ($options !== NULL && !is_array($options)) {
-      throw new \RuntimeException('Invalid options passed to getSupportedKeys');
-    }
+  public function getSupportedKeys(array $options = NULL) {
     if (isset($options['ifds'])) {
       return $this->getSupportedIfdsMap();
     }
