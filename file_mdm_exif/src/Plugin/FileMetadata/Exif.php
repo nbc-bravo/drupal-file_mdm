@@ -104,6 +104,13 @@ class Exif extends FileMetadataPluginBase {
   /**
    * {@inheritdoc}
    */
+  public function getSupportedKeys($options = NULL) {
+    return $this->tagMapper->getSupportedKeys($options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function getMetadataKey($key = NULL) {
     if (!$key) {
       return $this->metadata;
@@ -162,10 +169,6 @@ class Exif extends FileMetadataPluginBase {
    */
   protected function setMetadataKey($key, $value) {
     // @todo
-  }
-
-  public function getSupportedKeys($options = NULL) {
-    return $this->tagMapper->getSupportedKeys($options);
   }
 
 }

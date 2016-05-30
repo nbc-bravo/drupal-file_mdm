@@ -29,6 +29,18 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   public function getUri();
 
   /**
+   * Returns a list of metadata keys supported by the plugin.
+   *
+   * @param mixed $options
+   *   (optional) Allows specifying additional options to control the list of
+   *   metadata keys returned.
+   *
+   * @return array
+   *   A simple array of metadata keys supported.
+   */
+  public function getSupportedKeys($options = NULL);
+
+  /**
    * Gets a metadata element.
    *
    * @param mixed|NULL $key

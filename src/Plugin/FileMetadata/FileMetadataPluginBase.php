@@ -68,6 +68,14 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * {@inheritdoc}
    */
+  public function getSupportedKeys($options = NULL) {
+    // @todo error out
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getMetadata($key = NULL) {
     if (!$this->metadata && !empty($this->uri) && !$this->readFromFile) {
       // Metadata has not been loaded yet. Try loading it from file if URI is
