@@ -2,14 +2,12 @@
 
 namespace Drupal\file_mdm_exif\Plugin\FileMetadata;
 
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\file_mdm\Plugin\FileMetadata\FileMetadataPluginBase;
-use Drupal\file_mdm_exif\ExifTagMapper; // @todo interface
+use Drupal\file_mdm_exif\ExifTagMapperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use lsolesen\pel\PelIfd;
 use lsolesen\pel\PelJpeg;
-use lsolesen\pel\PelTag;
 
 /**
  * FileMetadata plugin for EXIF.
@@ -31,7 +29,7 @@ class Exif extends FileMetadataPluginBase {
   /**
    * The EXIF tag mapping service.
    *
-   * @var \Drupal\file_mdm_exif\ExifTagMapper @todo interface
+   * @var \Drupal\file_mdm_exif\ExifTagMapperInterface
    */
   protected $tagMapper;
 
@@ -44,15 +42,13 @@ class Exif extends FileMetadataPluginBase {
    *   The plugin_id for the plugin instance.
    * @param array $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\Core\File\FileSystemInterface $file_system
-   *   The file system service.
    * @param \Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface $mime_type_guesser
    *   The MIME type mapping service.
-   * @param \Drupal\file_mdm_exif\ExifTagMapper $tag_mapper @todo interface
+   * @param \Drupal\file_mdm_exif\ExifTagMapperInterface $tag_mapper
    *   The EXIF tag mapping service.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileSystemInterface $file_system, MimeTypeGuesserInterface $mime_type_guesser, ExifTagMapper $tag_mapper) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $file_system);
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, MimeTypeGuesserInterface $mime_type_guesser, ExifTagMapperInterface $tag_mapper) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->mimeTypeGuesser = $mime_type_guesser;
     $this->tagMapper = $tag_mapper;
   }
@@ -65,7 +61,6 @@ class Exif extends FileMetadataPluginBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('file_system'),
       $container->get('file.mime_type.guesser'),
       $container->get('file_mdm_exif.tag_mapper')
     );

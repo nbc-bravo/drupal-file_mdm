@@ -2,7 +2,6 @@
 
 namespace Drupal\file_mdm\Plugin\FileMetadata;
 
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\file_mdm\Plugin\FileMetadataPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -12,13 +11,6 @@ use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
  * Abstract implementation of a base File Metadata plugin.
  */
 abstract class FileMetadataPluginBase extends PluginBase implements FileMetadataPluginInterface {
-
-  /**
-   * The file system service.
-   *
-   * @var \Drupal\Core\File\FileSystemInterface
-   */
-  protected $fileSystem;
 
   /**
    * The URI of the file.
@@ -47,25 +39,6 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * @var bool
    */
   protected $hasMetadataChanged = FALSE;
-
-  /**
-   * Constructs a FileMetadataPluginBase object.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
-   * @param array $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface $mime_type_guesser
-   *   The MIME type mapping service.
-   * @param \Drupal\Core\File\FileSystemInterface $file_system
-   *   The file system service.
-   */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, FileSystemInterface $file_system) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->fileSystem = $file_system;
-  }
 
   /**
    * {@inheritdoc}

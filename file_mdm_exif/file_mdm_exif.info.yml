@@ -3,4 +3,4 @@ core: 8.x
 name: File metadata EXIF
 description: 'Provides a file metadata plugin for EXIF image information.'
 dependencies:
- - file_mdm
+  - file_mdm
