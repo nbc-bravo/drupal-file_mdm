@@ -23,7 +23,7 @@ interface ExifTagMapperInterface {
    *     'ifd' - the IFD EXIF integer identifier.
    *     'tag' - the TAG EXIF integer identifier.
    *
-   * @throws \RuntimeException  // @todo change exception type
+   * @throws \Drupal\file_mdm\FileMetadataException
    *   When wrong argument is passed, or if the IFD/TAG could not be found.
    */
   public function resolveKeyToIfdAndTag($key);

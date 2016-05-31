@@ -82,7 +82,7 @@ class Exif extends FileMetadataPluginBase {
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $config = \Drupal::service('config.factory')->getEditable('file_mdm_exif.settings');
-    $form['ifd_map'] = [
+    $form['ifd_map'] = [  // @todo
       '#type' => 'textarea',
       '#rows' => 6,
       '#default_value' => Yaml::encode($config->get('ifd_map')),

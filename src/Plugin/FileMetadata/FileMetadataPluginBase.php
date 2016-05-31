@@ -6,6 +6,7 @@ use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginBase;
+use Drupal\file_mdm\FileMetadataException;
 use Drupal\file_mdm\Plugin\FileMetadataPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
@@ -27,7 +28,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    *
    * @var string
    */
-  protected $uri = '';
+  protected $uri;
 
   /**
    * The hash used to reference the URI.
@@ -95,7 +96,9 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function setUri($uri) {
-    // @todo manage if uri is null, it means in-memory object; if changed from existing, a file is being renamed etc.
+    if (!$uri) {
+      throw new FileMetadataException('Missing $uri argument', $this->getPluginId(), __FUNCTION__);
+    }
     $this->uri = $uri;
     return $this;
   }
@@ -110,9 +113,11 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * {@inheritdoc}
    */
-  public function setHash($uri) {
-    // @todo manage if uri is null, it means in-memory object; if changed from existing, a file is being renamed etc.
-    $this->hash = $uri;
+  public function setHash($hash) {
+    if (!$hash) {
+      throw new FileMetadataException('Missing $hash argument', $this->getPluginId(), __FUNCTION__);
+    }
+    $this->hash = $hash;
     return $this;
   }
 
@@ -128,10 +133,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * {@inheritdoc}
    */
-  public function getSupportedKeys($options = NULL) {
-    // @todo error out
-    return [];
-  }
+  abstract public function getSupportedKeys($options = NULL);
 
   /**
    * {@inheritdoc}
@@ -141,7 +143,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
       // Metadata has not been loaded yet. Try loading it from cache first.
       $this->loadMetadataFromCache();
     }
-    if (!$this->metadata && !empty($this->uri) && !$this->readFromFile) {
+    if (!$this->metadata && $this->uri && !$this->readFromFile) {
       // Metadata has not been loaded yet. Try loading it from file if URI is
       // defined and a read attempt was not made yet.
       $this->loadMetadataFromFile();

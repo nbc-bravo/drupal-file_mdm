@@ -101,7 +101,7 @@ class FileMetadata { // @todo implements
       $plugin = $this->getFileMetadataPlugin($metadata_id);
       $metadata = $plugin->getMetadata($key);
     }
-    catch (\RuntimeException $e) {
+    catch (\Exception $e) {
       $this->logger->error($e->getMessage());
       $metadata = NULL;
     }
@@ -116,7 +116,7 @@ class FileMetadata { // @todo implements
       $plugin = $this->getFileMetadataPlugin($metadata_id);
       $keys = $plugin->getSupportedKeys($options);
     }
-    catch (\RuntimeException $e) {
+    catch (\Exception $e) {
       $this->logger->error($e->getMessage());
       $keys = NULL;
     }
@@ -131,7 +131,7 @@ class FileMetadata { // @todo implements
       $plugin = $this->getFileMetadataPlugin($metadata_id);
       $success = $plugin->setMetadata($key, $value);
     }
-    catch (\RuntimeException $e) {
+    catch (\Exception $e) {
       $this->logger->error($e->getMessage());
       $success = FALSE;
     }

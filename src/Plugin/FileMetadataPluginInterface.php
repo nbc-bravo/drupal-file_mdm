@@ -5,6 +5,7 @@ namespace Drupal\file_mdm\Plugin;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\file_mdm\FileMetadataException;
 
 /**
  * Provides an interface defining a FileMetadata plugin.
@@ -18,6 +19,9 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
    *   A URI.
    *
    * @return $this
+   *
+   * @throws \Drupal\file_mdm\FileMetadataException
+   *   If no URI is specified.
    */
   public function setUri($uri);
 
@@ -28,6 +32,19 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
    *   The URI of the file.
    */
   public function getUri();
+
+  /**
+   * Sets the hash used to reference the URI by the metadata manager.
+   *
+   * @param string $hash
+   *   A hash string.
+   *
+   * @return $this
+   *
+   * @throws \Drupal\file_mdm\FileMetadataException
+   *   If no hash is specified.
+   */
+  public function setHash($hash);
 
   /**
    * Returns a list of metadata keys supported by the plugin.

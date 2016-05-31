@@ -5,6 +5,7 @@ namespace Drupal\file_mdm_exif;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\file_mdm\FileMetadataException;
 use Psr\Log\LoggerInterface;
 use lsolesen\pel\PelIfd;
 use lsolesen\pel\PelJpeg;
@@ -94,17 +95,15 @@ class ExifTagMapper implements ExifTagMapperInterface {
    */
   public function resolveKeyToIfdAndTag($key) {
     if ($key === NULL) {
-      throw new \RuntimeException('No key passed');
+      throw new FileMetadataException('Missing $key argument', NULL, __METHOD__);
     }
     if (is_string($key)) {
-      if (!$tag = $this->stringToTag($key)) {
-        throw new \RuntimeException("No default ifd available for '{$key}'");
-      }
+      $tag = $this->stringToTag($key);
       return ['ifd' => $tag[0], 'tag' => $tag[1]];
     }
     if (is_array($key)) {
       if (!isset($key[0]) || !isset($key[1])) {
-        throw new \RuntimeException("Invalid Exif tag specified");
+        throw new FileMetadataException('Invalid $key array specified, must have two values', NULL, __METHOD__);
       }
       // Deal with ifd.
       if (is_int($key[0])) {
@@ -114,7 +113,7 @@ class ExifTagMapper implements ExifTagMapperInterface {
         $ifd = $this->stringToIfd($key[0]);
       }
       else {
-        throw new \RuntimeException("Invalid Ifd specified");
+        throw new FileMetadataException('Invalid EXIF IFD specified, must be a string or an integer', NULL, __METHOD__);
       }
       // Deal with tag.
       if (is_string($key[1])) {
@@ -124,11 +123,11 @@ class ExifTagMapper implements ExifTagMapperInterface {
         $tag = $key[1];
       }
       else {
-        throw new \RuntimeException("Invalid Exif tag specified");
+        throw new FileMetadataException('Invalid EXIF TAG specified, must be a string or an integer', NULL, __METHOD__);
       }
       return ['ifd' => $ifd, 'tag' => $tag];
     }
-    throw new \RuntimeException('Invalid key passed');
+    throw new FileMetadataException('Invalid $key argument, must be a string or an array', NULL, __METHOD__);
   }
 
   /**
@@ -210,7 +209,7 @@ class ExifTagMapper implements ExifTagMapperInterface {
    * @return array
    *   A simple array of with IFD and TAG, expressed as integers.
    *
-   * @throws \RuntimeException  // @todo change exception type
+   * @throws \Drupal\file_mdm\FileMetadataException
    *   When the IFD/TAG combination could not be found.
    */
   protected function stringToTag($value) {
@@ -219,7 +218,7 @@ class ExifTagMapper implements ExifTagMapperInterface {
     if ($tag) {
       return $tag;
     }
-    throw new \RuntimeException("No Exif tag found for '{$value}'");
+    throw new FileMetadataException("No EXIF TAG found for key '{$value}'", "EXIF");
   }
 
   /**
@@ -263,7 +262,7 @@ class ExifTagMapper implements ExifTagMapperInterface {
    * @return int
    *   The IFD identifier.
    *
-   * @throws \RuntimeException  // @todo change exception type
+   * @throws \Drupal\file_mdm\FileMetadataException
    *   When the IFD could not be found.
    */
   protected function stringToIfd($value) {
@@ -271,7 +270,7 @@ class ExifTagMapper implements ExifTagMapperInterface {
     if (isset($this->getStringToIfdMap()[$v])) {
       return $this->getStringToIfdMap()[$v];
     }
-    throw new \RuntimeException("Invalid Ifd '{$value}' specified");
+    throw new FileMetadataException("Invalid EXIF IFD '{$value}' specified", "EXIF");
   }
 
   /**

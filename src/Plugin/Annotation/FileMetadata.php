@@ -5,7 +5,7 @@ namespace Drupal\file_mdm\Plugin\Annotation;
 use Drupal\Component\Annotation\Plugin;
 
 /**
- * Defines a Plugin annotation object for the FileMetadata plugin.
+ * Defines a Plugin annotation object for FileMetadata plugins.
  *
  * @Annotation
  */
