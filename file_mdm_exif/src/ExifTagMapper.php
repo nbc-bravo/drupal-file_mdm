@@ -314,7 +314,7 @@ class ExifTagMapper implements ExifTagMapperInterface {
    *   The cache item or NULL on failure.
    */
   protected function getCache($id) {
-    if ($cache = $this->cache->get("file_mdm_exif:{$id}")) {
+    if ($cache = $this->cache->get("map:exif:{$id}")) {
       return $cache;
     }
     else {
@@ -334,7 +334,7 @@ class ExifTagMapper implements ExifTagMapperInterface {
    */
   protected function setCache($id, $value) {
     $config = $this->configFactory->get('file_mdm_exif.settings');
-    $this->cache->set("file_mdm_exif:{$id}", $value, Cache::PERMANENT, $config->getCacheTags());
+    $this->cache->set("map:exif:{$id}", $value, Cache::PERMANENT, $config->getCacheTags());
     return $this;
   }
 

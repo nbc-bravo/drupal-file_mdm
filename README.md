@@ -18,14 +18,15 @@ Warning: module is in development, not all stated below is implemented.
 ## Service / API features:
 
 1. Load from, and save to, file embedded metadata directly from the files.
-2. Manage metadata for a file via serialised objects that can be used e.g. in cache and/or stored in file entities. This helps avoiding repeating I/O on the files.
-3. Metadata for a file is cached in memory in the context of a request's lifetime. This also helps avoiding different modules all repeat I/O on the same file.
+2. Metadata for a file is cached in memory during a request's lifetime. This avoids different modules all repeat I/O on the same file.
+3. Metadata can also be cached in a Drupal cache bin to avoid repeating I/O on the files in successive requests.
 4. Metadata standards (EXIF, TTF, etc.) are implemented as plugins. The service loads the metadata plugin needed based on the calling code request.
 5. Manages copying to/from local temporary storage files stored in remote file systems, to allow PHP functions that do not support remote stream wrappers access the file locally.
 
 ## EXIF plugin features:
 
 1. Uses the [PHP Exif Library](https://github.com/lsolesen/pel) to read/write EXIF information to image files.
+2. Provides an abstraction layer to retrieve EXIF tags via metadata 'keys' and avoid need to know EXIF implementation details.
 
 ## Usage examples:
 
@@ -46,12 +47,13 @@ will return something like
 make: Canon - model: Canon PowerShot SX10 IS
 ```
 
-2. Load metadata from a previously cached metadata object, avoiding re-reading from the file:
+2. Save metadata to cache, so that following requests avoid re-reading from the file:
 
 ```php
   $fmdm = \Drupal::service('file_metadata_manager');
   $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
-  $my_file_metadata->loadMetadata('exif', $this->myMethodForGettingCachedMetadata(...))
+  $my_file_metadata->loadMetadata('exif');
+  $my_file_metadata->saveMetadataToCache('exif');
   $make = $my_file_metadata->getMetadata('exif', 'Make');
   ...
 ```

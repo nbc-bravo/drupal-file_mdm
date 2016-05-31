@@ -2,6 +2,8 @@
 
 namespace Drupal\file_mdm\Plugin\FileMetadata;
 
+use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\file_mdm\Plugin\FileMetadataPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -13,11 +15,25 @@ use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 abstract class FileMetadataPluginBase extends PluginBase implements FileMetadataPluginInterface {
 
   /**
+   * The cache service.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  protected $cache;
+
+  /**
    * The URI of the file.
    *
    * @var string
    */
   protected $uri = '';
+
+  /**
+   * The hash used to reference the URI.
+   *
+   * @var string
+   */
+  protected $hash;
 
   /**
    * The metadata of the file.
@@ -41,6 +57,23 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   protected $hasMetadataChanged = FALSE;
 
   /**
+   * Constructs a FileMetadataPluginBase plugin.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param array $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_service
+   *   The cache service.
+   */
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, CacheBackendInterface $cache_service) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->cache = $cache_service;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function setUri($uri) {
@@ -54,6 +87,15 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    */
   public function getUri() {
     return $this->uri;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setHash($uri) {
+    // @todo manage if uri is null, it means in-memory object; if changed from existing, a file is being renamed etc.
+    $this->hash = $uri;
+    return $this;
   }
 
   /**
@@ -77,6 +119,10 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function getMetadata($key = NULL) {
+    if (!$this->metadata && $this->hash) {
+      // Metadata has not been loaded yet. Try loading it from cache first.
+      $this->loadMetadataFromCache();
+    }
     if (!$this->metadata && !empty($this->uri) && !$this->readFromFile) {
       // Metadata has not been loaded yet. Try loading it from file if URI is
       // defined and a read attempt was not made yet.
@@ -117,6 +163,26 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    *   TRUE if metadata was changed successfully, FALSE otherwise.
    */
   abstract protected function setMetadataKey($key, $value);
+
+  public function loadMetadataFromCache() {
+    $plugin_id = $this->getPluginId();
+    if ($cache = $this->cache->get("hash:{$plugin_id}:{$this->hash}")) {
+      $this->loadMetadata($cache->data);  // @need to track that metadata was coming from cache to avoid re-writeing without need
+    }
+    else {
+      $this->loadMetadata(NULL);
+    }
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function saveMetadataToCache() {
+    $plugin_id = $this->getPluginId();
+    $this->cache->set("hash:{$plugin_id}:{$this->hash}", $this->metadata, Cache::PERMANENT);  // @todo tags
+    return $this;
+  }
 
   /**
    * {@inheritdoc}

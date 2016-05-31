@@ -76,12 +76,12 @@ class FileMetadataManager { // @todo implements
    * @todo
    */
   public function useUri($uri) {
-    $uri_hash = $this->hasUri($uri);
-    if (!$uri_hash) {
-      $uri_hash = hash('sha256', $uri);
-      $this->files[$uri_hash] = new FileMetadata($this->pluginManager, $this->logger, $uri);
+    $hash = $this->hasUri($uri);
+    if (!$hash) {
+      $hash = hash('sha256', $uri);
+      $this->files[$hash] = new FileMetadata($this->pluginManager, $this->logger, $uri, $hash);
     }
-    return $this->files[$uri_hash];
+    return $this->files[$hash];
   }
 
 }

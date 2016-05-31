@@ -2,6 +2,7 @@
 
 namespace Drupal\file_mdm_exif\Plugin\FileMetadata;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\file_mdm\Plugin\FileMetadata\FileMetadataPluginBase;
 use Drupal\file_mdm_exif\ExifTagMapperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -34,6 +35,9 @@ class Exif extends FileMetadataPluginBase {
    */
   protected $tagMapper;
 
+  // @todo
+  protected $file;
+
   /**
    * Constructs an Exif file metadata plugin.
    *
@@ -43,13 +47,15 @@ class Exif extends FileMetadataPluginBase {
    *   The plugin_id for the plugin instance.
    * @param array $plugin_definition
    *   The plugin implementation definition.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_service
+   *   The cache service.
    * @param \Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface $mime_type_guesser
    *   The MIME type mapping service.
    * @param \Drupal\file_mdm_exif\ExifTagMapperInterface $tag_mapper
    *   The EXIF tag mapping service.
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, MimeTypeGuesserInterface $mime_type_guesser, ExifTagMapperInterface $tag_mapper) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, CacheBackendInterface $cache_service, MimeTypeGuesserInterface $mime_type_guesser, ExifTagMapperInterface $tag_mapper) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $cache_service);
     $this->mimeTypeGuesser = $mime_type_guesser;
     $this->tagMapper = $tag_mapper;
   }
@@ -62,6 +68,7 @@ class Exif extends FileMetadataPluginBase {
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('cache.file_mdm'),
       $container->get('file.mime_type.guesser'),
       $container->get('file_mdm_exif.tag_mapper')
     );
@@ -78,8 +85,8 @@ class Exif extends FileMetadataPluginBase {
     $this->readFromFile = TRUE;
     switch ($this->mimeTypeGuesser->guess($this->getUri())) {
       case 'image/jpeg':
-        $jpeg = new PelJpeg($this->getUri());
-        if ($jpeg !== NULL && ($exif = $jpeg->getExif())) {
+        $this->file = new PelJpeg($this->getUri());
+        if ($this->file !== NULL && ($exif = $this->file->getExif())) {
           if (($tiff = $exif->getTiff()) !== NULL) {
             $this->metadata = $tiff;
           }
@@ -87,9 +94,9 @@ class Exif extends FileMetadataPluginBase {
         break;
 
       case 'image/tiff':
-        $tiff = new PelTiff($this->getUri());
-        if ($tiff !== NULL) {
-          $this->metadata = $tiff;
+        $this->file = new PelTiff($this->getUri());
+        if ($this->file !== NULL) {
+          $this->metadata = $this->file;
         }
         break;
 
@@ -99,6 +106,14 @@ class Exif extends FileMetadataPluginBase {
     }
     $this->hasMetadataChanged = FALSE;
     return (bool) $this->metadata;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function saveMetadataToFile() {
+    // @todo error
+    return $this->file->saveFile($this->getUri());
   }
 
   /**
@@ -168,7 +183,17 @@ class Exif extends FileMetadataPluginBase {
    * {@inheritdoc}
    */
   protected function setMetadataKey($key, $value) {
-    // @todo
+    if (!$key) {
+      throw new \RuntimeException("No metadata key specified for file at '{$this->getUri()}'");
+    }
+    elseif (!$this->metadata) {
+      throw new \RuntimeException("No metadata loaded for file at '{$this->getUri()}'");
+    }
+    else {
+      $entry = $this->getMetadataKey($key);
+      $entry->setValue($value);
+      return TRUE;
+    }
   }
 
 }

@@ -1,4 +1,10 @@
 services:
+  cache.file_mdm:
+    class: Drupal\Core\Cache\CacheBackendInterface
+    tags:
+      - { name: cache.bin }
+    factory: cache_factory:get
+    arguments: ['file_mdm']
   logger.channel.file_mdm:
     parent: logger.channel_base
     arguments: ['file_mdm']

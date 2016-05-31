@@ -32,6 +32,13 @@ class FileMetadata { // @todo implements
   protected $uri = '';
 
   /**
+   * The hash used to reference the URI.
+   *
+   * @var string
+   */
+  protected $hash;
+
+  /**
    * The local filesystem path to the file.
    *
    * This is used to allow accessing local copies of files stored remotely, to
@@ -44,10 +51,11 @@ class FileMetadata { // @todo implements
 
   protected $plugins = [];
 
-  public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, $uri) {
+  public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, $uri, $hash) {
     $this->pluginManager = $plugin_manager;
     $this->logger = $logger;
     $this->uri = $uri;
+    $this->hash = $hash;
   }
 
   /**
@@ -76,9 +84,11 @@ class FileMetadata { // @todo implements
    * @todo
    */
   public function getFileMetadataPlugin($metadata_id) {
+    // @todo excpetion if plugin missing
     if (!isset($this->plugins[$metadata_id])) {
       $this->plugins[$metadata_id] = $this->pluginManager->createInstance($metadata_id);
       $this->plugins[$metadata_id]->setUri($this->localTempPath ?: $this->uri);
+      $this->plugins[$metadata_id]->setHash($this->hash);
     }
     return $this->plugins[$metadata_id];
   }
@@ -117,7 +127,15 @@ class FileMetadata { // @todo implements
    * {@inheritdoc}
    */
   public function setMetadata($metadata_id, $key, $value) {
-    // @todo
+    try {
+      $plugin = $this->getFileMetadataPlugin($metadata_id);
+      $success = $plugin->setMetadata($key, $value);
+    }
+    catch (\RuntimeException $e) {
+      $this->logger->error($e->getMessage());
+      $success = FALSE;
+    }
+    return $success;
   }
 
   /**
@@ -126,6 +144,30 @@ class FileMetadata { // @todo implements
   public function loadMetadata($metadata_id, $metadata) {
     $plugin = $this->getFileMetadataPlugin($metadata_id);
     return $plugin->loadMetadata($metadata);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function loadMetadataFromCache($metadata_id) {
+    $plugin = $this->getFileMetadataPlugin($metadata_id);
+    return $plugin->loadMetadataFromCache();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function saveMetadataToCache($metadata_id) {
+    $plugin = $this->getFileMetadataPlugin($metadata_id);
+    return $plugin->saveMetadataToCache();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function saveMetadataToFile($metadata_id) {
+    $plugin = $this->getFileMetadataPlugin($metadata_id);
+    return $plugin->saveMetadataToFile();
   }
 
 }
