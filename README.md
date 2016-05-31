@@ -34,47 +34,47 @@ All examples are based on using the EXIF plugin.
 
 1. Basic usage:
 
-```php
-  $fmdm = \Drupal::service('file_metadata_manager');
-  $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
-  $make = $my_file_metadata->getMetadata('exif', 'Make');
-  $model = $my_file_metadata->getMetadata('exif', 'Model');
-  return ['#markup' => 'make: ' . $make->getValue() . ' - model: ' . $model->getValue()];
-```
-
-will return something like
-```
-make: Canon - model: Canon PowerShot SX10 IS
-```
+  ```php
+    $fmdm = \Drupal::service('file_metadata_manager');
+    $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
+    $make = $my_file_metadata->getMetadata('exif', 'Make');
+    $model = $my_file_metadata->getMetadata('exif', 'Model');
+    return ['#markup' => 'make: ' . $make->getValue() . ' - model: ' . $model->getValue()];
+  ```
+  
+  will return something like
+  ```
+  make: Canon - model: Canon PowerShot SX10 IS
+  ```
 
 2. Save metadata to cache, so that following requests avoid re-reading from the file:
 
-```php
-  $fmdm = \Drupal::service('file_metadata_manager');
-  $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
-  $my_file_metadata->loadMetadata('exif');
-  $my_file_metadata->saveMetadataToCache('exif');
-  $make = $my_file_metadata->getMetadata('exif', 'Make');
-  ...
-```
+  ```php
+    $fmdm = \Drupal::service('file_metadata_manager');
+    $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
+    $my_file_metadata->loadMetadata('exif');
+    $my_file_metadata->saveMetadataToCache('exif');
+    $make = $my_file_metadata->getMetadata('exif', 'Make');
+    ...
+  ```
 
 3. Use a known local temp copy of the remote file to avoid remote file access:
 
-```php
-  $fmdm = \Drupal::service('file_metadata_manager');
-  $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
-  $my_file_metadata->setLocalTempPath($temp_path);
-  $make = $my_file_metadata->getMetadata('exif', 'Make');
-  ...
-```
+  ```php
+    $fmdm = \Drupal::service('file_metadata_manager');
+    $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
+    $my_file_metadata->setLocalTempPath($temp_path);
+    $make = $my_file_metadata->getMetadata('exif', 'Make');
+    ...
+  ```
 
 4. Make a local temp copy of the remote file to avoid remote file access:
 
-```php
-  $fmdm = \Drupal::service('file_metadata_manager');
-  $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
-  $my_file_metadata->copyUriToTemp();
-  $make = $my_file_metadata->getMetadata('exif', 'Make');
-  ...
-```
+  ```php
+    $fmdm = \Drupal::service('file_metadata_manager');
+    $my_file_metadata = $fmdm->useUri('public::/my_directory/test-exif.jpeg');
+    $my_file_metadata->copyUriToTemp();
+    $make = $my_file_metadata->getMetadata('exif', 'Make');
+    ...
+  ```
 
