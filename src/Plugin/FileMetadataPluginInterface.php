@@ -2,13 +2,14 @@
 
 namespace Drupal\file_mdm\Plugin;
 
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
 
 /**
  * Provides an interface defining a FileMetadata plugin.
  */
-interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, PluginInspectionInterface {
+interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, PluginInspectionInterface, PluginFormInterface {
 
   /**
    * Sets the URI of the file.

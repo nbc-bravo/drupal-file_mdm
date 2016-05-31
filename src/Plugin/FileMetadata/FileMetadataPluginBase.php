@@ -4,6 +4,7 @@ namespace Drupal\file_mdm\Plugin\FileMetadata;
 
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\file_mdm\Plugin\FileMetadataPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -72,6 +73,23 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->cache = $cache_service;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    return [];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {  }
 
   /**
    * {@inheritdoc}

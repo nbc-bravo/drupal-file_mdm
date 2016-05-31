@@ -2,7 +2,9 @@
 
 namespace Drupal\file_mdm_exif\Plugin\FileMetadata;
 
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\file_mdm\Plugin\FileMetadata\FileMetadataPluginBase;
 use Drupal\file_mdm_exif\ExifTagMapperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -16,7 +18,8 @@ use lsolesen\pel\PelTiff;
  *
  * @FileMetadata(
  *   id = "exif",
- *   help = @Translation("FileMetadata plugin for EXIF."),
+ *   title = @Translation("EXIF image information"),
+ *   help = @Translation("File metadata plugin for EXIF, using the PHP Exif Library (PEL)."),
  * )
  */
 class Exif extends FileMetadataPluginBase {
@@ -72,6 +75,19 @@ class Exif extends FileMetadataPluginBase {
       $container->get('file.mime_type.guesser'),
       $container->get('file_mdm_exif.tag_mapper')
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $config = \Drupal::service('config.factory')->getEditable('file_mdm_exif.settings');
+    $form['ifd_map'] = [
+      '#type' => 'textarea',
+      '#rows' => 6,
+      '#default_value' => Yaml::encode($config->get('ifd_map')),
+    ];
+    return $form;
   }
 
   /**

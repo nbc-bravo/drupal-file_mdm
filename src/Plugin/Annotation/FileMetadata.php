@@ -19,6 +19,17 @@ class FileMetadata extends Plugin {
   public $id;
 
   /**
+   * The title of the plugin.
+   *
+   * The string should be wrapped in a @Translation().
+   *
+   * @ingroup plugin_translatable
+   *
+   * @var \Drupal\Core\Annotation\Translation
+   */
+  public $title;
+
+  /**
    * An informative description of the plugin.
    *
    * The string should be wrapped in a @Translation().
