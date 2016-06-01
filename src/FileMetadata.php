@@ -8,7 +8,7 @@ use Psr\Log\LoggerInterface;
 /**
  * A file metadata object.
  */
-class FileMetadata { // @todo implements
+class FileMetadata implements FileMetadataInterface {
 
   /**
    * The FileMetadata plugin manager.

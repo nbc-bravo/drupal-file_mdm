@@ -2,6 +2,7 @@
 
 namespace Drupal\file_mdm\Tests;
 
+use Drupal\file_mdm\FileMetadataInterface;
 use Drupal\simpletest\WebTestBase;
 
 /**
@@ -10,8 +11,6 @@ use Drupal\simpletest\WebTestBase;
  * @group File Metadata Manager
  */
 class FileMetadataManagerTest extends WebTestBase {
-
-  protected $strictConfigSchema = FALSE;  // @todo
 
   /**
    * Modules to enable.
@@ -126,23 +125,31 @@ class FileMetadataManagerTest extends WebTestBase {
       $entry = $file_metadata->getMetadata('exif', $test[0]);
       $this->assertEqual($test[1], $new_file_metadata->getMetadata('exif', $test[0])->getValue());
     }
-
-    $fmdm->debugDumpHashes();
-
   }
 
   /**
-   * @todo
+   * Returns the count of metadata keys found in the file.
+   *
+   * @param \Drupal\file_mdm\FileMetadataInterface $file_md
+   *   The FileMetadata object.
+   * @param string $metadata_id
+   *   The file metadata plugin id.
+   * @param mixed $options
+   *   (optional) Allows specifying additional options to control the list of
+   *   metadata keys returned.
+   *
+   * @return int
+   *   The count of metadata keys found in the file.
    */
-  protected function countMetadataKeys($file_metadata, $metadata_id, $options = NULL) {
-    $supported_keys = $file_metadata->getSupportedKeys($metadata_id, $options);
-    $keys = 0;
+  protected function countMetadataKeys(FileMetadataInterface $file_md, $metadata_id, $options = NULL) {
+    $supported_keys = $file_md->getSupportedKeys($metadata_id, $options);
+    $count = 0;
     foreach ($supported_keys as $key) {
-      if ($entry = $file_metadata->getMetadata($metadata_id , $key)) {
-        $keys++;
+      if ($entry = $file_md->getMetadata($metadata_id , $key)) {
+        $count++;
       }
     }
-    return $keys;
+    return $count;
   }
 
 }
