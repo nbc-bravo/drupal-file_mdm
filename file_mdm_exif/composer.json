@@ -3,6 +3,6 @@
     "type": "drupal-module",
     "description": "Provides a file metadata plugin for EXIF image information.",
     "require": {
-        "lsolesen/pel": "0.9.*"
+        "lsolesen/pel": "0.9.4"
     }
 }
