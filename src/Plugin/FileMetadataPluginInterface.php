@@ -71,7 +71,8 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   /**
    * Loads file metadata from the file at URI/local path.
    *
-   * @return $this
+   * @return bool
+   *   TRUE if metadata was loaded successfully, FALSE otherwise.
    *
    * @throws \Drupal\file_mdm\FileMetadataException
    *   In case there were significant errors reading from file.
@@ -81,7 +82,8 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   /**
    * Loads file metadata from a cache entry.
    *
-   * @return $this
+   * @return bool
+   *   TRUE if metadata was loaded successfully, FALSE otherwise.
    *
    * @throws \Drupal\file_mdm\FileMetadataException
    *   In case of significant errors.
@@ -113,6 +115,17 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
    *   TRUE if metadata was changed successfully, FALSE otherwise.
    */
   public function setMetadata($key, $value);
+
+  /**
+   * Removes a metadata element.
+   *
+   * @param mixed $key
+   *   A key to determine the metadata element to be removed.
+   *
+   * @return bool
+   *   TRUE if metadata was removed successfully, FALSE otherwise.
+   */
+  public function removeMetadata($key);
 
   /**
    * Determines if plugin is capable of writing metadata to files.

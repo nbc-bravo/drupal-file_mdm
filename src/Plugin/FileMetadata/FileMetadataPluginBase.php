@@ -52,11 +52,25 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   protected $readFromFile = FALSE;
 
   /**
+   * Track if file metadata was retrieved from cache.
+   *
+   * @var bool
+   */
+  protected $readFromCache = FALSE;
+
+  /**
    * Track if metadata has been changed via ::setMetadata().
    *
    * @var bool
    */
   protected $hasMetadataChanged = FALSE;
+
+  /**
+   * Track if file metadata on cache needs update.
+   *
+   * @var bool
+   */
+  protected $hasMetadataChangedFromCached = FALSE;
 
   /**
    * Constructs a FileMetadataPluginBase plugin.
@@ -127,8 +141,37 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   public function loadMetadata($metadata) {
     $this->metadata = $metadata;
     $this->hasMetadataChanged = FALSE;
+    if ($this->readFromCache) {
+      $this->hasMetadataChangedFromCached = TRUE;
+    }
+    $this->readFromCache = FALSE;
+    $this->readFromFile = FALSE;
     return $this;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function loadMetadataFromFile() {
+    if (!file_exists($this->getUri())) {
+      // File does not exists.
+      throw new FileMetadataException("File at '{$this->getUri()}' does not exist", $this->getPluginId(), __FUNCTION__);
+    }
+    $this->metadata = $this->doGetMetadataFromFile();
+    $this->readFromFile = TRUE;
+    return (bool) $this->metadata;
+  }
+
+  /**
+   * Gets file metadata from the file at URI/local path.
+   *
+   * @return mixed
+   *   The metadata retrieved from the file.
+   *
+   * @throws \Drupal\file_mdm\FileMetadataException
+   *   In case there were significant errors reading from file.
+   */
+  abstract protected function doGetMetadataFromFile();
 
   /**
    * {@inheritdoc}
@@ -136,12 +179,16 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   public function loadMetadataFromCache() {
     $plugin_id = $this->getPluginId();
     if ($cache = $this->cache->get("hash:{$plugin_id}:{$this->hash}")) {
-      $this->loadMetadata($cache->data);  // @todo need to track that metadata was coming from cache to avoid re-writeing without need
+      $this->metadata = $cache->data;
+      $this->readFromCache = TRUE;
+      $this->hasMetadataChangedFromCached = FALSE;
     }
     else {
-      $this->loadMetadata(NULL);
+      $this->metadata = NULL;
+      $this->readFromCache = FALSE;
+      $this->hasMetadataChangedFromCached = FALSE;
     }
-    return $this;
+    return (bool) $this->metadata;
   }
 
   /**
@@ -177,7 +224,12 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function setMetadata($key, $value) {
-    return $this->doSetMetadata($key, $value);
+    if ($this->doSetMetadata($key, $value)) {
+      $this->hasMetadataChanged = TRUE;
+      if ($this->readFromCache) {
+        $this->hasMetadataChangedFromCached = TRUE;
+      }
+    }
   }
 
   /**
@@ -192,6 +244,24 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    *   TRUE if metadata was changed successfully, FALSE otherwise.
    */
   abstract protected function doSetMetadata($key, $value);
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeMetadata($key) {
+    return $this->doRemoveMetadata($key);
+  }
+
+  /**
+   * Removes a metadata element.
+   *
+   * @param mixed $key
+   *   A key to determine the metadata element to be removed.
+   *
+   * @return bool
+   *   TRUE if metadata was removed successfully, FALSE otherwise.
+   */
+  abstract protected function doRemoveMetadata($key);
 
   /**
    * {@inheritdoc}
@@ -219,23 +289,12 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   abstract protected function doSaveMetadataToFile();
 
   /**
-   * Determines if metadata loaded from cache was changed and needs update.
-   *
-   * @return bool
-   *   TRUE if metadata loaded from cache was changed and the cache entry needs
-   *   to be updated, FALSE otherwise.
-   */
-  protected function isCacheUpdateNeeded() {
-    // @todo
-    return TRUE;
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function saveMetadataToCache(array $tags = []) {
     $plugin_id = $this->getPluginId();
     $this->cache->set("hash:{$plugin_id}:{$this->hash}", $this->metadata, Cache::PERMANENT, $tags);
+    $this->hasMetadataChangedFromCached = FALSE;
     return $this;
   }
 

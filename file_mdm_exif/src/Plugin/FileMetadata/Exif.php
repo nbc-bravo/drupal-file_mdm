@@ -101,18 +101,13 @@ class Exif extends FileMetadataPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function loadMetadataFromFile() {
-    if (!file_exists($this->getUri())) {
-      // File does not exists.
-      throw new FileMetadataException("Cannot read file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
-    }
-    $this->readFromFile = TRUE;
+  protected function doGetMetadataFromFile() {
     switch ($this->mimeTypeGuesser->guess($this->getUri())) {
       case 'image/jpeg':
         $this->file = new PelJpeg($this->getUri());
         if ($this->file !== NULL && ($exif = $this->file->getExif())) {
           if (($tiff = $exif->getTiff()) !== NULL) {
-            $this->metadata = $tiff;
+            return $tiff;
           }
         }
         break;
@@ -120,7 +115,7 @@ class Exif extends FileMetadataPluginBase {
       case 'image/tiff':
         $this->file = new PelTiff($this->getUri());
         if ($this->file !== NULL) {
-          $this->metadata = $this->file;
+          return $this->file;
         }
         break;
 
@@ -128,14 +123,13 @@ class Exif extends FileMetadataPluginBase {
         break;
 
     }
-    $this->hasMetadataChanged = FALSE;
-    return (bool) $this->metadata;
+    return NULL;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function doSaveMetadataToFile() {
+  protected function doSaveMetadataToFile() {
     // @todo error
     return $this->file->saveFile($this->getUri());
   }
@@ -207,10 +201,17 @@ class Exif extends FileMetadataPluginBase {
       throw new FileMetadataException("No metadata loaded for file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
     }
     else {
-      $entry = $this->doGetMetadata($key);
+      $entry = $this->getMetadata($key);
       $entry->setValue($value);
       return TRUE;
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function doRemoveMetadata($key) {
+    // @todo
   }
 
 }
