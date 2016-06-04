@@ -5,6 +5,7 @@ namespace Drupal\file_mdm_exif\Plugin\FileMetadata;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file_mdm\FileMetadataException;
 use Drupal\file_mdm\Plugin\FileMetadata\FileMetadataPluginBase;
 use Drupal\file_mdm_exif\ExifTagMapperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -93,10 +94,17 @@ class Exif extends FileMetadataPluginBase {
   /**
    * {@inheritdoc}
    */
+  public function getSupportedKeys($options = NULL) {
+    return $this->tagMapper->getSupportedKeys($options);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function loadMetadataFromFile() {
     if (!file_exists($this->getUri())) {
       // File does not exists.
-      throw new \RuntimeException("Cannot read file at '{$this->getUri()}'");
+      throw new FileMetadataException("Cannot read file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
     }
     $this->readFromFile = TRUE;
     switch ($this->mimeTypeGuesser->guess($this->getUri())) {
@@ -127,7 +135,7 @@ class Exif extends FileMetadataPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function saveMetadataToFile() {
+  public function doSaveMetadataToFile() {
     // @todo error
     return $this->file->saveFile($this->getUri());
   }
@@ -135,14 +143,7 @@ class Exif extends FileMetadataPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getSupportedKeys($options = NULL) {
-    return $this->tagMapper->getSupportedKeys($options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getMetadataKey($key = NULL) {
+  protected function doGetMetadata($key = NULL) {
     if (!$key) {
       return $this->metadata;
     }
@@ -198,15 +199,15 @@ class Exif extends FileMetadataPluginBase {
   /**
    * {@inheritdoc}
    */
-  protected function setMetadataKey($key, $value) {
+  protected function doSetMetadata($key, $value) {
     if (!$key) {
-      throw new \RuntimeException("No metadata key specified for file at '{$this->getUri()}'");
+      throw new FileMetadataException("No metadata key specified for file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
     }
     elseif (!$this->metadata) {
-      throw new \RuntimeException("No metadata loaded for file at '{$this->getUri()}'");
+      throw new FileMetadataException("No metadata loaded for file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
     }
     else {
-      $entry = $this->getMetadataKey($key);
+      $entry = $this->doGetMetadata($key);
       $entry->setValue($value);
       return TRUE;
     }

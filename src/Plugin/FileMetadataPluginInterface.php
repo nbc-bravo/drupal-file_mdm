@@ -59,6 +59,36 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   public function getSupportedKeys($options = NULL);
 
   /**
+   * Loads file metadata from an in-memory object/array.
+   *
+   * @param mixed $metadata
+   *   The file metadata associated to the file at URI.
+   *
+   * @return $this
+   */
+  public function loadMetadata($metadata);
+
+  /**
+   * Loads file metadata from the file at URI/local path.
+   *
+   * @return $this
+   *
+   * @throws \Drupal\file_mdm\FileMetadataException
+   *   In case there were significant errors reading from file.
+   */
+  public function loadMetadataFromFile();
+
+  /**
+   * Loads file metadata from a cache entry.
+   *
+   * @return $this
+   *
+   * @throws \Drupal\file_mdm\FileMetadataException
+   *   In case of significant errors.
+   */
+  public function loadMetadataFromCache();
+
+  /**
    * Gets a metadata element.
    *
    * @param mixed|NULL $key
@@ -85,28 +115,6 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   public function setMetadata($key, $value);
 
   /**
-   * Loads file metadata from an in-memory object/array.
-   *
-   * @param mixed $metadata
-   *   The file metadata associated to the file at URI.
-   *
-   * @return bool
-   *   TRUE if metadata was loaded successfully, FALSE otherwise.
-   */
-  public function loadMetadata($metadata);
-
-  /**
-   * Loads file metadata from the file at URI/local path.
-   *
-   * @throws \RuntimeException
-   *   In case there were significant errors reading from file.
-   *
-   * @return bool
-   *   TRUE if metadata was loaded successfully, FALSE otherwise.
-   */
-  public function loadMetadataFromFile();
-
-  /**
    * Determines if plugin is capable of writing metadata to files.
    *
    * @return bool
@@ -121,5 +129,14 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
    *   TRUE if metadata was saved successfully, FALSE otherwise.
    */
   public function saveMetadataToFile();
+
+  /**
+   * Caches metadata for file at URI.
+   *
+   * Uses the 'file_mdm' cache bin.
+   *
+   * @return $this
+   */
+  public function saveMetadataToCache(array $tags = []);
 
 }
