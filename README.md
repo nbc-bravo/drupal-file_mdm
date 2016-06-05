@@ -4,6 +4,7 @@ A Drupal 8 module providing a file metadata manager service and API. Allows to g
 like EXIF photo information, TrueType font information, etc. 
 
 Metadata protocols are pluggable. Developers can implement a plugin and use the service framework to get the metadata required.
+A 'getimagesize' plugin is provided, to manage through the service calls to the PHP ```getimagesize()``` function. 
 
 This module is inspired by discussions at [#2630242 Provide methods to retrieve EXIF image information via the Image object](https://www.drupal.org/node/2630242).
 
