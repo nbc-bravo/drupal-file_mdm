@@ -92,6 +92,18 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * {@inheritdoc}
    */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('cache.file_mdm')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     return [];
   }
@@ -158,6 +170,11 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
       throw new FileMetadataException("File at '{$this->getUri()}' does not exist", $this->getPluginId(), __FUNCTION__);
     }
     $this->metadata = $this->doGetMetadataFromFile();
+    $this->hasMetadataChanged = FALSE;
+    if ($this->readFromCache) {
+      $this->hasMetadataChangedFromCached = TRUE;
+    }
+    $this->readFromCache = FALSE;
     $this->readFromFile = TRUE;
     return (bool) $this->metadata;
   }
@@ -180,13 +197,17 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     $plugin_id = $this->getPluginId();
     if ($cache = $this->cache->get("hash:{$plugin_id}:{$this->hash}")) {
       $this->metadata = $cache->data;
-      $this->readFromCache = TRUE;
+      $this->hasMetadataChanged = FALSE;
       $this->hasMetadataChangedFromCached = FALSE;
+      $this->readFromCache = TRUE;
+      $this->readFromFile = FALSE;
     }
     else {
       $this->metadata = NULL;
-      $this->readFromCache = FALSE;
+      $this->hasMetadataChanged = FALSE;
       $this->hasMetadataChangedFromCached = FALSE;
+      $this->readFromCache = FALSE;
+      $this->readFromFile = FALSE;
     }
     return (bool) $this->metadata;
   }
@@ -249,7 +270,12 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function removeMetadata($key) {
-    return $this->doRemoveMetadata($key);
+    if ($this->doRemoveMetadata($key, $value)) {
+      $this->hasMetadataChanged = TRUE;
+      if ($this->readFromCache) {
+        $this->hasMetadataChangedFromCached = TRUE;
+      }
+    }
   }
 
   /**
@@ -277,7 +303,10 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     if (!$this->isSaveToFileSupported()) {
       throw new FileMetadataException('Write metadata to file is not supported', $this->getPluginId());
     }
-    return $this->doSaveMetadataToFile();
+    if ($this->hasMetadataChanged) {
+      return $this->doSaveMetadataToFile();
+    }
+    return TRUE;
   }
 
   /**
@@ -286,15 +315,20 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * @return bool
    *   TRUE if metadata was saved successfully, FALSE otherwise.
    */
-  abstract protected function doSaveMetadataToFile();
+  protected function doSaveMetadataToFile() {
+    return FALSE;
+  }
+
 
   /**
    * {@inheritdoc}
    */
   public function saveMetadataToCache(array $tags = []) {
-    $plugin_id = $this->getPluginId();
-    $this->cache->set("hash:{$plugin_id}:{$this->hash}", $this->metadata, Cache::PERMANENT, $tags);
-    $this->hasMetadataChangedFromCached = FALSE;
+    if (!$this->readFromCache || ($this->readFromCache && $this->hasMetadataChangedFromCached)) {
+      $plugin_id = $this->getPluginId();
+      $this->cache->set("hash:{$plugin_id}:{$this->hash}", $this->metadata, Cache::PERMANENT, $tags);
+      $this->hasMetadataChangedFromCached = FALSE;
+    }
     return $this;
   }
 
