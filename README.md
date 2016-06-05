@@ -3,13 +3,9 @@
 A Drupal 8 module providing a file metadata manager service and API. Allows to get, via an unified API, information stored in files
 like EXIF photo information, TrueType font information, etc. 
 
-Metadata protocols are defined as plugins, so developers can implement a plugin and use the service to get the metadata required.
-
-It also provides an EXIF metadata plugin, which uses the [PHP Exif Library](https://github.com/lsolesen/pel) to read/write EXIF information to image files, so bypassing the limitations of the standard PHP Exif extensions which only provides read capabilities.
+Metadata protocols are pluggable. Developers can implement a plugin and use the service framework to get the metadata required.
 
 This module is inspired by discussions at [#2630242 Provide methods to retrieve EXIF image information via the Image object](https://www.drupal.org/node/2630242).
-
-The module uses Composer to get its dependencies.
 
 ----------------------
 Warning: module is in development, not all stated below is implemented.
@@ -18,12 +14,15 @@ Warning: module is in development, not all stated below is implemented.
 ## Service / API features:
 
 1. Load from, and save to, file embedded metadata directly from the files.
-2. Metadata for a file is cached in memory during a request's lifetime. This avoids different modules all repeat I/O on the same file.
-3. Metadata can also be cached in a Drupal cache bin to avoid repeating I/O on the files in successive requests.
+2. Metadata for a file is statically cached during a request's lifetime. This avoids different modules all repeat I/O on the same file.
+3. Metadata can be cached in a Drupal cache bin to avoid repeating I/O on the files in successive requests.
 4. Metadata standards (EXIF, TTF, etc.) are implemented as plugins. The service loads the metadata plugin needed based on the calling code request.
 5. Manages copying to/from local temporary storage files stored in remote file systems, to allow PHP functions that do not support remote stream wrappers access the file locally.
 
 ## EXIF plugin features:
+
+The module provides an EXIF metadata plugin, which uses the [PHP Exif Library](https://github.com/lsolesen/pel) to read/write EXIF information to image files, so bypassing the limitations of the standard PHP Exif extensions which only provides read capabilities.
+The module uses Composer to get its dependencies.
 
 1. Uses the [PHP Exif Library](https://github.com/lsolesen/pel) to read/write EXIF information to image files.
 2. Provides an abstraction layer to retrieve EXIF tags via metadata 'keys' and avoid need to know EXIF implementation details.
