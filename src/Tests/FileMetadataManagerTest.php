@@ -108,11 +108,32 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
     // Walk through test files.
     foreach ($image_files as $image_file) {
       $file_metadata = $fmdm->useUri($image_file['uri']);
+      // Read from file.
       $this->assertEqual($image_file['count_keys'], $this->countMetadataKeys($file_metadata, 'getimagesize'));
       foreach ($image_file['test_keys'] as $test) {
         $entry = $file_metadata->getMetadata('getimagesize', $test[0]);
         $this->assertEqual($test[1], $entry);
       }
+      // Try getting an unsupported key.
+      $this->assertNull($file_metadata->getMetadata('getimagesize', 'baz'));
+      // Try getting an invalid key.
+      $this->assertNull($file_metadata->getMetadata('getimagesize', ['qux' => 'laa']));
+      // Change MIME type.
+      $this->assertTrue($file_metadata->setMetadata('getimagesize', 'mime', 'foo/bar'));
+      $this->assertEqual('foo/bar', $file_metadata->getMetadata('getimagesize', 'mime'));
+      // Try adding an unsupported key.
+      $this->assertFalse($file_metadata->setMetadata('getimagesize', 'baz', 'qux'));
+      $this->assertNull($file_metadata->getMetadata('getimagesize', 'baz'));
+      // Try adding an invalid key.
+      $this->assertFalse($file_metadata->setMetadata('getimagesize', ['qux' => 'laa'], 'hoz'));
+      // Remove MIME type.
+      $this->assertTrue($file_metadata->removeMetadata('getimagesize', 'mime'));
+      $this->assertEqual($image_file['count_keys'] - 1, $this->countMetadataKeys($file_metadata, 'getimagesize'));
+      $this->assertNull($file_metadata->getMetadata('getimagesize', 'mime'));
+      // Try removing an unsupported key.
+      $this->assertFalse($file_metadata->removeMetadata('getimagesize', 'baz'));
+      // Try removing an invalid key.
+      $this->assertFalse($file_metadata->removeMetadata('getimagesize', ['qux' => 'laa']));
     }
 
     // Test loading metadata from an in-memory object.
@@ -127,9 +148,7 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
     }
 
     /* @todo
-       - invalid keys get/set/remove
-       - setMetadata
-       - removeMetadata
+       - invalid plugin
        - caching (write to cache and reread after deleting file; read from cache then change data and resave to cache, re-read)
      */
   }
