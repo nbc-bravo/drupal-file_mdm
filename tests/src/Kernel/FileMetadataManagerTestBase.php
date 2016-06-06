@@ -1,14 +1,14 @@
 <?php
 
-namespace Drupal\file_mdm\Tests;
+namespace Drupal\Tests\file_mdm\Kernel;
 
 use Drupal\file_mdm\FileMetadataInterface;
-use Drupal\simpletest\WebTestBase;
+use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Base test class for File Metadata Manager.
  */
-abstract class FileMetadataManagerTestBase extends WebTestBase {
+abstract class FileMetadataManagerTestBase extends KernelTestBase {
 
   /**
    * Returns the count of metadata keys found in the file.

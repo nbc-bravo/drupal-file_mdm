@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\file_mdm\Tests;
+namespace Drupal\Tests\file_mdm\Kernel;
 
 /**
  * Tests that File Metadata Manager works properly.
@@ -21,7 +21,7 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
    */
   public function testFileMetadata() {
     // Prepare a copy of test files.
-    $this->drupalGetTestFiles('image');
+    file_unmanaged_copy(drupal_get_path('module', 'simpletest') . '/files/image-test.png', 'public://', FILE_EXISTS_REPLACE);
     file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'public://', FILE_EXISTS_REPLACE);
     // The image files that will be tested.
     $image_files = [
