@@ -107,7 +107,7 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
 
     // Walk through test files.
     foreach ($image_files as $image_file) {
-      $file_metadata = $fmdm->useUri($image_file['uri']);
+      $file_metadata = $fmdm->uri($image_file['uri']);
       // Read from file.
       $this->assertEqual($image_file['count_keys'], $this->countMetadataKeys($file_metadata, 'getimagesize'));
       foreach ($image_file['test_keys'] as $test) {
@@ -136,10 +136,20 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
       $this->assertFalse($file_metadata->removeMetadata('getimagesize', ['qux' => 'laa']));
     }
 
+    // Test releasing URI.
+    $this->assertEqual(6, $fmdm->count());
+    $this->assertTrue($fmdm->has($image_files[0]['uri']));
+    $this->assertTrue($fmdm->release($image_files[0]['uri']));
+    $this->assertEqual(5, $fmdm->count());
+    $this->assertFalse($fmdm->has($image_files[0]['uri']));
+    $this->assertFalse($fmdm->release($image_files[0]['uri']));
+
     // Test loading metadata from an in-memory object.
-    $file_metadata_from = $fmdm->useUri($image_files[0]['uri']);
+    $file_metadata_from = $fmdm->uri($image_files[0]['uri']);
+    $this->assertEqual(6, $fmdm->count());
     $metadata = $file_metadata_from->getMetadata('getimagesize');
-    $new_file_metadata = $fmdm->useUri('public://test-output.jpeg');
+    $new_file_metadata = $fmdm->uri('public://test-output.jpeg');
+    $this->assertEqual(7, $fmdm->count());
     $new_file_metadata->loadMetadata('getimagesize', $metadata);
     $this->assertEqual($image_files[0]['count_keys'], $this->countMetadataKeys($new_file_metadata, 'getimagesize'));
     foreach ($image_files[0]['test_keys'] as $test) {
@@ -184,7 +194,7 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
     // Test setting local temp path explicitly. The files should be parsed
     // even if not available on the URI.
     foreach ($image_files as $image_file) {
-      $file_metadata = $fmdm->useUri($image_file['uri']);
+      $file_metadata = $fmdm->uri($image_file['uri']);
       $file_metadata->setLocalTempPath($image_file['local_path']);
       // No file to be found at URI.
       $this->assertFalse(file_exists($image_file['uri']));
@@ -230,7 +240,7 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
     file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'dummy-remote://', FILE_EXISTS_REPLACE);
 
     foreach ($image_files as $image_file) {
-      $file_metadata = $fmdm->useUri($image_file['uri']);
+      $file_metadata = $fmdm->uri($image_file['uri']);
       $file_metadata->copyUriToTemp();
       // File to be found at destination URI.
       $this->assertTrue(file_exists($image_file['uri']));

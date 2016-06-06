@@ -47,8 +47,8 @@ class GetImageSize extends FileMetadataPluginBase {
     if (!is_int($key) && !is_string($key)) {
       throw new FileMetadataException("Invalid metadata key specified", $this->getPluginId(), $method);
     }
-    if (!in_array($key, $this->getSupportedKeys())) {
-      throw new FileMetadataException("Invalid metadata key {$key} specified", $this->getPluginId(), $method);
+    if (!in_array($key, $this->getSupportedKeys(), TRUE)) {
+      throw new FileMetadataException("Invalid metadata key '{$key}' specified", $this->getPluginId(), $method);
     }
     return TRUE;
   }

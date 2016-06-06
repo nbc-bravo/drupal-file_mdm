@@ -51,12 +51,17 @@ interface FileMetadataInterface {
   /**
    * @todo
    */
+  public function getSupportedKeys($metadata_id, $options = NULL);
+
+  /**
+   * @todo
+   */
   public function getMetadata($metadata_id, $key = NULL);
 
   /**
    * @todo
    */
-  public function getSupportedKeys($metadata_id, $options = NULL);
+  public function removeMetadata($metadata_id, $key);
 
   /**
    * @todo

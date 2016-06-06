@@ -136,25 +136,6 @@ class FileMetadata implements FileMetadataInterface {
   /**
    * {@inheritdoc}
    */
-  public function getMetadata($metadata_id, $key = NULL) {
-    try {
-      if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
-        $metadata = $plugin->getMetadata($key);
-      }
-      else {
-        $metadata = NULL;
-      }
-    }
-    catch (\Exception $e) {
-      $this->logger->error($e->getMessage());
-      $metadata = NULL;
-    }
-    return $metadata;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getSupportedKeys($metadata_id, $options = NULL) {
     try {
       if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
@@ -174,20 +155,50 @@ class FileMetadata implements FileMetadataInterface {
   /**
    * {@inheritdoc}
    */
-  public function setMetadata($metadata_id, $key, $value) {
+  public function getMetadata($metadata_id, $key = NULL) {
     try {
       if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
-        $success = $plugin->setMetadata($key, $value);
+        $metadata = $plugin->getMetadata($key);
       }
       else {
-        $success = FALSE;
+        $metadata = NULL;
       }
     }
     catch (\Exception $e) {
       $this->logger->error($e->getMessage());
-      $success = FALSE;
+      $metadata = NULL;
     }
-    return $success;
+    return $metadata;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function removeMetadata($metadata_id, $key) {
+    try {
+      if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
+        return $plugin->removeMetadata($key);
+      }
+    }
+    catch (\Exception $e) {
+      $this->logger->error($e->getMessage());
+    }
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setMetadata($metadata_id, $key, $value) {
+    try {
+      if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
+        return $plugin->setMetadata($key, $value);
+      }
+    }
+    catch (\Exception $e) {
+      $this->logger->error($e->getMessage());
+    }
+    return FALSE;
   }
 
   /**

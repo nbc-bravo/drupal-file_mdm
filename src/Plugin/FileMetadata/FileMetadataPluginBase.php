@@ -250,7 +250,9 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
       if ($this->readFromCache) {
         $this->hasMetadataChangedFromCached = TRUE;
       }
+      return TRUE;
     }
+    return FALSE;
   }
 
   /**
@@ -270,12 +272,14 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function removeMetadata($key) {
-    if ($this->doRemoveMetadata($key, $value)) {
+    if ($this->doRemoveMetadata($key)) {
       $this->hasMetadataChanged = TRUE;
       if ($this->readFromCache) {
         $this->hasMetadataChangedFromCached = TRUE;
       }
+      return TRUE;
     }
+    return FALSE;
   }
 
   /**

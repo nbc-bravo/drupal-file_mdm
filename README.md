@@ -30,7 +30,7 @@ All examples are based on using the 'getimagesize' plugin.
 
   ```php
     $fmdm = \Drupal::service('file_metadata_manager');
-    $my_file_metadata = $fmdm->useUri('public::/my_directory/test-image.jpeg');
+    $my_file_metadata = $fmdm->uri('public::/my_directory/test-image.jpeg');
     $mime = $my_file_metadata->getMetadata('getimagesize', 'mime');
     return ['#markup' => 'MIME type: ' . $mime];
   ```
@@ -44,7 +44,7 @@ All examples are based on using the 'getimagesize' plugin.
 
   ```php
     $fmdm = \Drupal::service('file_metadata_manager');
-    $my_file_metadata = $fmdm->useUri('public::/my_directory/test-image.jpeg');
+    $my_file_metadata = $fmdm->uri('public::/my_directory/test-image.jpeg');
     $my_file_metadata->loadMetadata('getimagesize');
     $my_file_metadata->saveMetadataToCache('getimagesize');
     ...
@@ -54,7 +54,7 @@ All examples are based on using the 'getimagesize' plugin.
 
   ```php
     $fmdm = \Drupal::service('file_metadata_manager');
-    $my_file_metadata = $fmdm->useUri('remote_wrapper::/my_directory/test-image.jpeg');
+    $my_file_metadata = $fmdm->uri('remote_wrapper::/my_directory/test-image.jpeg');
     $my_file_metadata->setLocalTempPath($temp_path);
     $mime = $my_file_metadata->getMetadata('getimagesize', 'mime');
     ...
@@ -64,7 +64,7 @@ All examples are based on using the 'getimagesize' plugin.
 
   ```php
     $fmdm = \Drupal::service('file_metadata_manager');
-    $my_file_metadata = $fmdm->useUri('remote_wrapper::/my_directory/test-image.jpeg');
+    $my_file_metadata = $fmdm->uri('remote_wrapper::/my_directory/test-image.jpeg');
     $my_file_metadata->copyUriToTemp();
     $mime = $my_file_metadata->getMetadata('getimagesize', 'mime');
     ...

@@ -67,18 +67,25 @@ class FileMetadataManager { // @todo implements
   /**
    * @todo
    */
-  public function hasUri($uri) {
-    $uri_hash = hash('sha256', $uri);
-    return isset($this->files[$uri_hash]) ? $uri_hash : FALSE;
+  protected function calculateHash($uri) {
+    // @todo error if uri is null or invalid
+    return hash('sha256', $uri);
   }
 
   /**
    * @todo
    */
-  public function useUri($uri) {
-    $hash = $this->hasUri($uri);
-    if (!$hash) {
-      $hash = hash('sha256', $uri);
+  public function has($uri) {
+    $hash = $this->calculateHash($uri);
+    return isset($this->files[$hash]);
+  }
+
+  /**
+   * @todo
+   */
+  public function uri($uri) {
+    $hash = $this->calculateHash($uri);
+    if (!isset($this->files[$hash])) {
       $this->files[$hash] = new FileMetadata($this->pluginManager, $this->logger, $this->fileSystem, $uri, $hash);
     }
     return $this->files[$hash];
@@ -87,11 +94,20 @@ class FileMetadataManager { // @todo implements
   /**
    * @todo
    */
-  public function releaseUri($uri) {
-    if ($hash = $this->hasUri($uri)) {
+  public function release($uri) {
+    $hash = $this->calculateHash($uri);
+    if (isset($this->files[$hash])) {
       unset($this->files[$hash]);
+      return TRUE;
     }
-    return $this;
+    return FALSE;
+  }
+
+  /**
+   * @todo
+   */
+  public function count() {
+    return count($this->files);
   }
 
 }
