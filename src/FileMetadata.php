@@ -66,7 +66,18 @@ class FileMetadata implements FileMetadataInterface {
   protected $plugins = [];
 
   /**
-   * @todo
+   * Constructs a FileMetadata object.
+   *
+   * @param \Drupal\file_mdm\Plugin\FileMetadataPluginManager $plugin_manager
+   *   The file metadata plugin manager.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   The logger service.
+   * @param \Drupal\Core\File\FileSystemInterface $file_system
+   *   The file system service.
+   * @param string $uri
+   *   The URI of the file.
+   * @param string $hash
+   *   The hash used to reference the URI by file_mdm.
    */
   public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, FileSystemInterface $file_system, $uri, $hash) {
     $this->pluginManager = $plugin_manager;
@@ -93,8 +104,8 @@ class FileMetadata implements FileMetadataInterface {
   /**
    * {@inheritdoc}
    */
-  public function setLocalTempPath($path) {
-    $this->localTempPath = $path;
+  public function setLocalTempPath($temp_uri) {
+    $this->localTempPath = $temp_uri;
     return $this;
   }
 
@@ -213,7 +224,8 @@ class FileMetadata implements FileMetadataInterface {
    */
   public function loadMetadata($metadata_id, $metadata) {
     if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
-      return $plugin->loadMetadata($metadata);
+      $plugin->loadMetadata($metadata);
+      return TRUE;
     }
     return FALSE;
   }
