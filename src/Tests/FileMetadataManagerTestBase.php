@@ -1,0 +1,38 @@
+<?php
+
+namespace Drupal\file_mdm\Tests;
+
+use Drupal\file_mdm\FileMetadataInterface;
+use Drupal\simpletest\WebTestBase;
+
+/**
+ * Base test class for File Metadata Manager.
+ */
+class FileMetadataManagerTestBase extends WebTestBase {
+
+  /**
+   * Returns the count of metadata keys found in the file.
+   *
+   * @param \Drupal\file_mdm\FileMetadataInterface $file_md
+   *   The FileMetadata object.
+   * @param string $metadata_id
+   *   The file metadata plugin id.
+   * @param mixed $options
+   *   (optional) Allows specifying additional options to control the list of
+   *   metadata keys returned.
+   *
+   * @return int
+   *   The count of metadata keys found in the file.
+   */
+  protected function countMetadataKeys(FileMetadataInterface $file_md, $metadata_id, $options = NULL) {
+    $supported_keys = $file_md->getSupportedKeys($metadata_id, $options);
+    $count = 0;
+    foreach ($supported_keys as $key) {
+      if ($entry = $file_md->getMetadata($metadata_id , $key)) {
+        $count++;
+      }
+    }
+    return $count;
+  }
+
+}

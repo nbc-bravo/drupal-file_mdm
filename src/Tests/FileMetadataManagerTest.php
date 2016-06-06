@@ -2,15 +2,12 @@
 
 namespace Drupal\file_mdm\Tests;
 
-use Drupal\file_mdm\FileMetadataInterface;
-use Drupal\simpletest\WebTestBase;
-
 /**
  * Tests that File Metadata Manager works properly.
  *
  * @group File Metadata Manager
  */
-class FileMetadataManagerTest extends WebTestBase {
+class FileMetadataManagerTest extends FileMetadataManagerTestBase {
 
   /**
    * Modules to enable.
@@ -26,7 +23,6 @@ class FileMetadataManagerTest extends WebTestBase {
     // Prepare a copy of test files.
     $this->drupalGetTestFiles('image');
     file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'public://', FILE_EXISTS_REPLACE);
-    file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'temporary://', FILE_EXISTS_REPLACE);
     // The image files that will be tested.
     $image_files = [
       [
@@ -36,7 +32,7 @@ class FileMetadataManagerTest extends WebTestBase {
         'test_keys' => [
           [0, 100],
           [1, 75],
-          [2, 2],
+          [2, IMAGETYPE_JPEG],
           ['bits', 8],
           ['channels', 3],
           ['mime', 'image/jpeg'],
@@ -49,21 +45,7 @@ class FileMetadataManagerTest extends WebTestBase {
         'test_keys' => [
           [0, 100],
           [1, 75],
-          [2, 2],
-          ['bits', 8],
-          ['channels', 3],
-          ['mime', 'image/jpeg'],
-        ],
-      ],
-      [
-        // Remote storage file. Pass the path to a local copy of the file.
-        'uri' => 'dummy-remote://test-exif.jpeg',
-        'local_path' => $this->container->get('file_system')->realpath('temporary://test-exif.jpeg'),
-        'count_keys' => 7,
-        'test_keys' => [
-          [0, 100],
-          [1, 75],
-          [2, 2],
+          [2, IMAGETYPE_JPEG],
           ['bits', 8],
           ['channels', 3],
           ['mime', 'image/jpeg'],
@@ -76,7 +58,7 @@ class FileMetadataManagerTest extends WebTestBase {
         'test_keys' => [
           [0, 1024],
           [1, 768],
-          [2, 2],
+          [2, IMAGETYPE_JPEG],
           ['bits', 8],
           ['channels', 3],
           ['mime', 'image/jpeg'],
@@ -89,7 +71,7 @@ class FileMetadataManagerTest extends WebTestBase {
         'test_keys' => [
           [0, 174],
           [1, 38],
-          [2, 8],
+          [2, IMAGETYPE_TIFF_MM],
           ['mime', 'image/tiff'],
         ],
       ],
@@ -100,7 +82,7 @@ class FileMetadataManagerTest extends WebTestBase {
         'test_keys' => [
           [0, 40],
           [1, 20],
-          [2, 3],
+          [2, IMAGETYPE_PNG],
           ['bits', 8],
           ['mime', 'image/png'],
         ],
@@ -112,9 +94,6 @@ class FileMetadataManagerTest extends WebTestBase {
     // Walk through test files.
     foreach($image_files as $image_file) {
       $file_metadata = $fmdm->useUri($image_file['uri']);
-      if (isset($image_file['local_path'])) {
-        $file_metadata->setLocalTempPath($image_file['local_path']);
-      }
       $this->assertEqual($image_file['count_keys'], $this->countMetadataKeys($file_metadata, 'getimagesize'));
       foreach ($image_file['test_keys'] as $test) {
         $entry = $file_metadata->getMetadata('getimagesize', $test[0]);
@@ -143,28 +122,46 @@ class FileMetadataManagerTest extends WebTestBase {
   }
 
   /**
-   * Returns the count of metadata keys found in the file.
-   *
-   * @param \Drupal\file_mdm\FileMetadataInterface $file_md
-   *   The FileMetadata object.
-   * @param string $metadata_id
-   *   The file metadata plugin id.
-   * @param mixed $options
-   *   (optional) Allows specifying additional options to control the list of
-   *   metadata keys returned.
-   *
-   * @return int
-   *   The count of metadata keys found in the file.
+   * Tests remote files, using the 'getimagesize' plugin.
    */
-  protected function countMetadataKeys(FileMetadataInterface $file_md, $metadata_id, $options = NULL) {
-    $supported_keys = $file_md->getSupportedKeys($metadata_id, $options);
-    $count = 0;
-    foreach ($supported_keys as $key) {
-      if ($entry = $file_md->getMetadata($metadata_id , $key)) {
-        $count++;
+  public function testRemoteFile() {
+    // Just copy the test file to a temp location.
+    file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'temporary://', FILE_EXISTS_REPLACE);
+    // The image files that will be tested.
+    $image_files = [
+      [
+        // Remote storage file. Pass the path to a local copy of the file.
+        'uri' => 'dummy-remote://test-exif.jpeg',
+        'local_path' => $this->container->get('file_system')->realpath('temporary://test-exif.jpeg'),
+        'count_keys' => 7,
+        'test_keys' => [
+          [0, 100],
+          [1, 75],
+          [2, IMAGETYPE_JPEG],
+          ['bits', 8],
+          ['channels', 3],
+          ['mime', 'image/jpeg'],
+        ],
+      ],
+    ];
+
+    $fmdm = $this->container->get('file_metadata_manager');
+
+    // Walk through test files. The files should be parsed even if not
+    // available on the URI.
+    foreach($image_files as $image_file) {
+      $file_metadata = $fmdm->useUri($image_file['uri']);
+      $file_metadata->setLocalTempPath($image_file['local_path']);
+      // No file to be found at URI.
+      $this->assertFalse(file_exists($image_file['uri']));
+      // File to be found at local temp path.
+      $this->assertTrue(file_exists($file_metadata->getLocalTempPath()));
+      $this->assertEqual($image_file['count_keys'], $this->countMetadataKeys($file_metadata, 'getimagesize'));
+      foreach ($image_file['test_keys'] as $test) {
+        $entry = $file_metadata->getMetadata('getimagesize', $test[0]);
+        $this->assertEqual($test[1], $entry);
       }
     }
-    return $count;
   }
 
 }
