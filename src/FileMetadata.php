@@ -58,8 +58,16 @@ class FileMetadata implements FileMetadataInterface {
    */
   protected $localTempPath;
 
+  /**
+   * The array of FileMetadata plugins for this URI.
+   *
+   * @var \Drupal\file_mdm\Plugin\FileMetadataPluginInterface[]
+   */
   protected $plugins = [];
 
+  /**
+   * @todo
+   */
   public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, FileSystemInterface $file_system, $uri, $hash) {
     $this->pluginManager = $plugin_manager;
     $this->logger = $logger;
@@ -116,19 +124,18 @@ class FileMetadata implements FileMetadataInterface {
   }
 
   /**
-   * @todo
+   * {@inheritdoc}
    */
   public function getFileMetadataPlugin($metadata_id) {
-    // @todo excpetion if plugin missing
     if (!isset($this->plugins[$metadata_id])) {
       try {
         $this->plugins[$metadata_id] = $this->pluginManager->createInstance($metadata_id);
+        $this->plugins[$metadata_id]->setUri($this->localTempPath ?: $this->uri);
+        $this->plugins[$metadata_id]->setHash($this->hash);
       }
       catch (PluginNotFoundException $e) {
         return NULL;
       }
-      $this->plugins[$metadata_id]->setUri($this->localTempPath ?: $this->uri);
-      $this->plugins[$metadata_id]->setHash($this->hash);
     }
     return $this->plugins[$metadata_id];
   }
