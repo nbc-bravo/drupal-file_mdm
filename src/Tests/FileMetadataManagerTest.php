@@ -52,6 +52,19 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
         ],
       ],
       [
+        // PHP getimagesize works on remote stream wrappers.
+        'uri' => 'dummy-remote://test-exif.jpeg',
+        'count_keys' => 7,
+        'test_keys' => [
+          [0, 100],
+          [1, 75],
+          [2, IMAGETYPE_JPEG],
+          ['bits', 8],
+          ['channels', 3],
+          ['mime', 'image/jpeg'],
+        ],
+      ],
+      [
         // JPEG Image with GPS data.
         'uri' => drupal_get_path('module', 'file_mdm') . '/tests/files/1024-2006_1011_093752.jpg',
         'count_keys' => 7,
@@ -111,14 +124,13 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
       $entry = $file_metadata->getMetadata('getimagesize', $test[0]);
       $this->assertEqual($test[1], $new_file_metadata->getMetadata('getimagesize', $test[0]));
     }
-    
+
     /* @todo
-       - improve localpath test, delete target uri (separate test block)
        - invalid keys get/set/remove
        - setMetadata
        - removeMetadata
        - caching (write to cache and reread after deleting file; read from cache then change data and resave to cache, re-read)
-     */  
+     */
   }
 
   /**
@@ -162,6 +174,10 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
         $this->assertEqual($test[1], $entry);
       }
     }
+
+    /* @todo
+       - tests for file_mdm file moves
+     */
   }
 
 }

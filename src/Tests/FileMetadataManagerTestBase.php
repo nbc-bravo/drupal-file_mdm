@@ -8,7 +8,7 @@ use Drupal\simpletest\WebTestBase;
 /**
  * Base test class for File Metadata Manager.
  */
-class FileMetadataManagerTestBase extends WebTestBase {
+abstract class FileMetadataManagerTestBase extends WebTestBase {
 
   /**
    * Returns the count of metadata keys found in the file.
