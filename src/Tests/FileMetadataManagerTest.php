@@ -134,6 +134,10 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
       $this->assertFalse($file_metadata->removeMetadata('getimagesize', 'baz'));
       // Try removing an invalid key.
       $this->assertFalse($file_metadata->removeMetadata('getimagesize', ['qux' => 'laa']));
+      // Try getting/setting/removing metadata for a non-existing plugin.
+      $this->assertNull($file_metadata->getMetadata('laila', 'han'));
+      $this->assertFalse($file_metadata->setMetadata('laila', 'han', 'solo'));
+      $this->assertFalse($file_metadata->removeMetadata('laila', 'han'));
     }
 
     // Test releasing URI.
@@ -156,10 +160,6 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
       $entry = $file_metadata->getMetadata('getimagesize', $test[0]);
       $this->assertEqual($test[1], $new_file_metadata->getMetadata('getimagesize', $test[0]));
     }
-
-    /* @todo
-       - invalid plugin
-     */
   }
 
   /**
