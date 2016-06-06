@@ -3,6 +3,7 @@
 namespace Drupal\file_mdm;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\file_mdm\Plugin\FileMetadataPluginManager;
 use Psr\Log\LoggerInterface;
@@ -35,6 +36,13 @@ class FileMetadataManager { // @todo implements
    */
   protected $configFactory;
 
+  /**
+   * The file system service.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
+
   protected $files = [];
 
   /**
@@ -46,22 +54,14 @@ class FileMetadataManager { // @todo implements
    *   The file_mdm logger.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
+   * @param \Drupal\Core\File\FileSystemInterface $file_system
+   *   The file system service.
    */
-  public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, ConfigFactoryInterface $config_factory) {
+  public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, ConfigFactoryInterface $config_factory, FileSystemInterface $file_system) {
     $this->pluginManager = $plugin_manager;
     $this->logger = $logger;
     $this->configFactory = $config_factory;
-  }
-
-  /**
-   * @todo
-   */
-  public function debugDumpHashes() {
-    $ret = [];
-    foreach ($this->files as $hash => $file) {
-      $ret[] = [$hash, $file->getUri(), $file->getLocalTempPath()];
-    }
-    debug($ret);
+    $this->fileSystem = $file_system;
   }
 
   /**
@@ -79,9 +79,19 @@ class FileMetadataManager { // @todo implements
     $hash = $this->hasUri($uri);
     if (!$hash) {
       $hash = hash('sha256', $uri);
-      $this->files[$hash] = new FileMetadata($this->pluginManager, $this->logger, $uri, $hash);
+      $this->files[$hash] = new FileMetadata($this->pluginManager, $this->logger, $this->fileSystem, $uri, $hash);
     }
     return $this->files[$hash];
+  }
+
+  /**
+   * @todo
+   */
+  public function releaseUri($uri) {
+    if ($hash = $this->hasUri($uri)) {
+      unset($this->files[$hash]);
+    }
+    return $this;
   }
 
 }

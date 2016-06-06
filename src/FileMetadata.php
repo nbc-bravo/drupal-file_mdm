@@ -2,6 +2,8 @@
 
 namespace Drupal\file_mdm;
 
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\file_mdm\Plugin\FileMetadataPluginManager;
 use Psr\Log\LoggerInterface;
 
@@ -23,6 +25,13 @@ class FileMetadata implements FileMetadataInterface {
    * @var \Psr\Log\LoggerInterface
    */
   protected $logger;
+
+  /**
+   * The file system service.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface
+   */
+  protected $fileSystem;
 
   /**
    * The URI of the file.
@@ -51,9 +60,10 @@ class FileMetadata implements FileMetadataInterface {
 
   protected $plugins = [];
 
-  public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, $uri, $hash) {
+  public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, FileSystemInterface $file_system, $uri, $hash) {
     $this->pluginManager = $plugin_manager;
     $this->logger = $logger;
+    $this->fileSystem = $file_system;
     $this->uri = $uri;
     $this->hash = $hash;
   }
@@ -81,12 +91,42 @@ class FileMetadata implements FileMetadataInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function copyUriToTemp($temp_uri = NULL) {
+    if ($temp_uri === NULL) {
+      $temp_uri = $this->fileSystem->tempnam('temporary://', 'file_mdm_');
+      $this->fileSystem->unlink($temp_uri);
+      $temp_uri .= '.' . pathinfo($this->getUri(), PATHINFO_EXTENSION);
+    }
+    if ($temp_uri = file_unmanaged_copy($this->getUri(), $temp_uri, FILE_EXISTS_REPLACE)) {
+      $this->setLocalTempPath($temp_uri);
+    }
+    return (bool) $temp_uri;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function copyTempToUri() {
+    if (($temp_uri = $this->getLocalTempPath()) === NULL) {
+      return FALSE;
+    }
+    return (bool) file_unmanaged_copy($temp_uri, $this->getUri(), FILE_EXISTS_REPLACE);
+  }
+
+  /**
    * @todo
    */
   public function getFileMetadataPlugin($metadata_id) {
     // @todo excpetion if plugin missing
     if (!isset($this->plugins[$metadata_id])) {
-      $this->plugins[$metadata_id] = $this->pluginManager->createInstance($metadata_id);
+      try {
+        $this->plugins[$metadata_id] = $this->pluginManager->createInstance($metadata_id);
+      }
+      catch (PluginNotFoundException $e) {
+        return NULL;
+      }
       $this->plugins[$metadata_id]->setUri($this->localTempPath ?: $this->uri);
       $this->plugins[$metadata_id]->setHash($this->hash);
     }
@@ -98,8 +138,12 @@ class FileMetadata implements FileMetadataInterface {
    */
   public function getMetadata($metadata_id, $key = NULL) {
     try {
-      $plugin = $this->getFileMetadataPlugin($metadata_id);
-      $metadata = $plugin->getMetadata($key);
+      if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
+        $metadata = $plugin->getMetadata($key);
+      }
+      else {
+        $metadata = NULL;
+      }
     }
     catch (\Exception $e) {
       $this->logger->error($e->getMessage());
@@ -113,8 +157,12 @@ class FileMetadata implements FileMetadataInterface {
    */
   public function getSupportedKeys($metadata_id, $options = NULL) {
     try {
-      $plugin = $this->getFileMetadataPlugin($metadata_id);
-      $keys = $plugin->getSupportedKeys($options);
+      if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
+        $keys = $plugin->getSupportedKeys($options);
+      }
+      else {
+        $keys = NULL;
+      }
     }
     catch (\Exception $e) {
       $this->logger->error($e->getMessage());
@@ -128,8 +176,12 @@ class FileMetadata implements FileMetadataInterface {
    */
   public function setMetadata($metadata_id, $key, $value) {
     try {
-      $plugin = $this->getFileMetadataPlugin($metadata_id);
-      $success = $plugin->setMetadata($key, $value);
+      if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
+        $success = $plugin->setMetadata($key, $value);
+      }
+      else {
+        $success = FALSE;
+      }
     }
     catch (\Exception $e) {
       $this->logger->error($e->getMessage());
@@ -142,32 +194,40 @@ class FileMetadata implements FileMetadataInterface {
    * {@inheritdoc}
    */
   public function loadMetadata($metadata_id, $metadata) {
-    $plugin = $this->getFileMetadataPlugin($metadata_id);
-    return $plugin->loadMetadata($metadata);
+    if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
+      return $plugin->loadMetadata($metadata);
+    }
+    return FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
   public function loadMetadataFromCache($metadata_id) {
-    $plugin = $this->getFileMetadataPlugin($metadata_id);
-    return $plugin->loadMetadataFromCache();
+    if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
+      return $plugin->loadMetadataFromCache();
+    }
+    return FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
   public function saveMetadataToCache($metadata_id) {
-    $plugin = $this->getFileMetadataPlugin($metadata_id);
-    return $plugin->saveMetadataToCache();
+    if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
+      return $plugin->saveMetadataToCache();
+    }
+    return FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
   public function saveMetadataToFile($metadata_id) {
-    $plugin = $this->getFileMetadataPlugin($metadata_id);
-    return $plugin->saveMetadataToFile();
+    if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
+      return $plugin->saveMetadataToFile();
+    }
+    return FALSE;
   }
 
 }

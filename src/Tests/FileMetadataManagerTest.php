@@ -102,10 +102,11 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
       ],
     ];
 
+    // Get the file metadata manager service.
     $fmdm = $this->container->get('file_metadata_manager');
 
     // Walk through test files.
-    foreach($image_files as $image_file) {
+    foreach ($image_files as $image_file) {
       $file_metadata = $fmdm->useUri($image_file['uri']);
       $this->assertEqual($image_file['count_keys'], $this->countMetadataKeys($file_metadata, 'getimagesize'));
       foreach ($image_file['test_keys'] as $test) {
@@ -134,11 +135,9 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
   }
 
   /**
-   * Tests remote files, using the 'getimagesize' plugin.
+   * Tests remote files, setting local temp path explicitly.
    */
-  public function testRemoteFile() {
-    // Just copy the test file to a temp location.
-    file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'temporary://', FILE_EXISTS_REPLACE);
+  public function testRemoteFileSetLocalPath() {
     // The image files that will be tested.
     $image_files = [
       [
@@ -157,11 +156,15 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
       ],
     ];
 
+    // Get the file metadata manager service.
     $fmdm = $this->container->get('file_metadata_manager');
 
-    // Walk through test files. The files should be parsed even if not
-    // available on the URI.
-    foreach($image_files as $image_file) {
+    // Copy the test file to a temp location.
+    file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'temporary://', FILE_EXISTS_REPLACE);
+
+    // Test setting local temp path explicitly. The files should be parsed
+    // even if not available on the URI.
+    foreach ($image_files as $image_file) {
       $file_metadata = $fmdm->useUri($image_file['uri']);
       $file_metadata->setLocalTempPath($image_file['local_path']);
       // No file to be found at URI.
@@ -173,11 +176,55 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
         $entry = $file_metadata->getMetadata('getimagesize', $test[0]);
         $this->assertEqual($test[1], $entry);
       }
+      // Copies temp to destination URI.
+      $this->assertTrue($file_metadata->copyTempToUri());
+      $this->assertTrue(file_exists($image_file['uri']));
     }
+  }
 
-    /* @todo
-       - tests for file_mdm file moves
-     */
+  /**
+   * Tests remote files, letting file_mdm manage setting local temp path.
+   */
+  public function testRemoteFileCopy() {
+    // The image files that will be tested.
+    $image_files = [
+      [
+        // Remote storage file. Pass the path to a local copy of the file.
+        'uri' => 'dummy-remote://test-exif.jpeg',
+        'count_keys' => 7,
+        'test_keys' => [
+          [0, 100],
+          [1, 75],
+          [2, IMAGETYPE_JPEG],
+          ['bits', 8],
+          ['channels', 3],
+          ['mime', 'image/jpeg'],
+        ],
+      ],
+    ];
+
+    // Get the file metadata manager service.
+    $fmdm = $this->container->get('file_metadata_manager');
+    $file_system = $this->container->get('file_system');
+
+    // Copy the test file to dummy-remote wrapper.
+    file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'dummy-remote://', FILE_EXISTS_REPLACE);
+
+    foreach ($image_files as $image_file) {
+      $file_metadata = $fmdm->useUri($image_file['uri']);
+      $file_metadata->copyUriToTemp();
+      // File to be found at destination URI.
+      $this->assertTrue(file_exists($image_file['uri']));
+      // File to be found at local temp URI.
+      $this->assertEqual('temporary', $file_system->uriScheme($file_metadata->getLocalTempPath()));
+      $this->assertIdentical(0, strpos($file_system->basename($file_metadata->getLocalTempPath()), 'file_mdm_'));
+      $this->assertTrue(file_exists($file_metadata->getLocalTempPath()));
+      $this->assertEqual($image_file['count_keys'], $this->countMetadataKeys($file_metadata, 'getimagesize'));
+      foreach ($image_file['test_keys'] as $test) {
+        $entry = $file_metadata->getMetadata('getimagesize', $test[0]);
+        $this->assertEqual($test[1], $entry);
+      }
+    }
   }
 
 }
