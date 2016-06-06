@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Provides a service to manage file metadata.
+ */
+
+/**
+ * Implements hook_cache_flush().
+ */
+function file_mdm_cache_flush() {
+  return array('file_mdm');
+}

@@ -159,8 +159,83 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
 
     /* @todo
        - invalid plugin
-       - caching (write to cache and reread after deleting file; read from cache then change data and resave to cache, re-read)
      */
+  }
+
+  /**
+   * Test caching.
+   */
+  public function testFileMetadataCaching() {
+    // Prepare a copy of test files.
+    file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'public://', FILE_EXISTS_REPLACE);
+
+    // The image files that will be tested.
+    $image_files = [
+      [
+        // Pass a URI.
+        'uri' => 'public://test-exif.jpeg',
+        'count_keys' => 7,
+        'test_keys' => [
+          [0, 100],
+          [1, 75],
+          [2, IMAGETYPE_JPEG],
+          ['bits', 8],
+          ['channels', 3],
+          ['mime', 'image/jpeg'],
+        ],
+      ],
+    ];
+
+    // Get the file metadata manager service.
+    $fmdm = $this->container->get('file_metadata_manager');
+
+    // Walk through test files.
+    foreach ($image_files as $image_file) {
+      $file_metadata = $fmdm->uri($image_file['uri']);
+
+      // Cache metadata.
+      $this->assertTrue($file_metadata->saveMetadataToCache('getimagesize'));
+      $this->assertFalse($file_metadata->saveMetadataToCache('bar'));
+
+      // Release URI.
+      $file_metadata = NULL;
+      $this->assertTrue($fmdm->release($image_file['uri']));
+      $this->assertEqual(0, $fmdm->count());
+
+      // Delete file.
+      file_unmanaged_delete($image_file['uri']);
+
+      // No file to be found at URI.
+      $this->assertFalse(file_exists($image_file['uri']));
+
+      // Read from cache.
+      $file_metadata = $fmdm->uri($image_file['uri']);
+      $this->assertEqual($image_file['count_keys'], $this->countMetadataKeys($file_metadata, 'getimagesize'));
+      foreach ($image_file['test_keys'] as $test) {
+        $entry = $file_metadata->getMetadata('getimagesize', $test[0]);
+        $this->assertEqual($test[1], $entry);
+      }
+
+      // Change MIME type and remove 0, 1, 2, 3.
+      $this->assertTrue($file_metadata->setMetadata('getimagesize', 'mime', 'foo/bar'));
+      $this->assertTrue($file_metadata->removeMetadata('getimagesize', 0));
+      $this->assertTrue($file_metadata->removeMetadata('getimagesize', 1));
+      $this->assertTrue($file_metadata->removeMetadata('getimagesize', 2));
+      $this->assertTrue($file_metadata->removeMetadata('getimagesize', 3));
+
+      // Save again to cache.
+      $this->assertTrue($file_metadata->saveMetadataToCache('getimagesize'));
+
+      // Release URI.
+      $file_metadata = NULL;
+      $this->assertTrue($fmdm->release($image_file['uri']));
+      $this->assertIdentical(0, $fmdm->count());
+
+      // Read from cache.
+      $file_metadata = $fmdm->uri($image_file['uri']);
+      $this->assertIdentical($image_file['count_keys'] - 4, $this->countMetadataKeys($file_metadata, 'getimagesize'));
+      $this->assertIdentical('foo/bar', $file_metadata->getMetadata('getimagesize', 'mime'));
+    }
   }
 
   /**

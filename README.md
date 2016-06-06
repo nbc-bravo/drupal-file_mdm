@@ -45,7 +45,6 @@ All examples are based on using the 'getimagesize' plugin.
   ```php
     $fmdm = \Drupal::service('file_metadata_manager');
     $my_file_metadata = $fmdm->uri('public::/my_directory/test-image.jpeg');
-    $my_file_metadata->loadMetadata('getimagesize');
     $my_file_metadata->saveMetadataToCache('getimagesize');
     ...
   ```

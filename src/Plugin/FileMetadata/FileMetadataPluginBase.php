@@ -42,7 +42,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    *
    * @var mixed
    */
-  protected $metadata;
+  protected $metadata = NULL;
 
   /**
    * Track if file at URI has been parsed for metadata.
@@ -216,11 +216,11 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function getMetadata($key = NULL) {
-    if (!$this->metadata && $this->hash) {
+    if ($this->metadata === NULL && $this->hash) {
       // Metadata has not been loaded yet. Try loading it from cache first.
       $this->loadMetadataFromCache();
     }
-    if (!$this->metadata && $this->uri && !$this->readFromFile) {
+    if ($this->metadata === NULL && $this->uri && !$this->readFromFile) {
       // Metadata has not been loaded yet. Try loading it from file if URI is
       // defined and a read attempt was not made yet.
       $this->loadMetadataFromFile();
@@ -307,10 +307,13 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     if (!$this->isSaveToFileSupported()) {
       throw new FileMetadataException('Write metadata to file is not supported', $this->getPluginId());
     }
+    if ($this->metadata === NULL) {
+      return FALSE;
+    }
     if ($this->hasMetadataChanged) {
       return $this->doSaveMetadataToFile();
     }
-    return TRUE;
+    return FALSE;
   }
 
   /**
@@ -328,12 +331,19 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function saveMetadataToCache(array $tags = []) {
+    if ($this->metadata === NULL) {
+      $this->getMetadata();
+      if ($this->metadata === NULL) {
+        return FALSE;
+      }
+    }
     if (!$this->readFromCache || ($this->readFromCache && $this->hasMetadataChangedFromCached)) {
       $plugin_id = $this->getPluginId();
       $this->cache->set("hash:{$plugin_id}:{$this->hash}", $this->metadata, Cache::PERMANENT, $tags);
       $this->hasMetadataChangedFromCached = FALSE;
+      return TRUE;
     }
-    return $this;
+    return FALSE;
   }
 
 }
