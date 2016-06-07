@@ -2,6 +2,8 @@
 
 namespace Drupal\file_mdm;
 
+use Drupal\Core\Cache\Cache;
+
 /**
  * Provides an interface for file metadata objects.
  */
@@ -157,11 +159,14 @@ interface FileMetadataInterface {
    *   The id of the FileMetadata plugin.
    * @param array $tags
    *   (optional) An array of cache tags to save to cache.
+   * @param int $expire
+   *   (optional) The cache entry expiration time. Defaults to
+   *   Cache::PERMANENT.
    *
    * @return bool
    *   TRUE if metadata was saved successfully, FALSE otherwise.
    */
-  public function saveMetadataToCache($metadata_id, array $tags = []);
+  public function saveMetadataToCache($metadata_id, array $tags = [], $expire = Cache::PERMANENT);
 
   /**
    * Saves metadata to file at URI.

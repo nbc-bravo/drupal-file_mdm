@@ -2,6 +2,7 @@
 
 namespace Drupal\file_mdm;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -44,6 +45,13 @@ class FileMetadataManager implements FileMetadataManagerInterface {
   protected $fileSystem;
 
   /**
+   * The cache service.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  protected $cache;
+
+  /**
    * The array of FileMetadata objects currently in use.
    *
    * @var \Drupal\file_mdm\FileMetadataInterface[]
@@ -61,12 +69,15 @@ class FileMetadataManager implements FileMetadataManagerInterface {
    *   The config factory.
    * @param \Drupal\Core\File\FileSystemInterface $file_system
    *   The file system service.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_service
+   *   The cache service.
    */
-  public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, ConfigFactoryInterface $config_factory, FileSystemInterface $file_system) {
+  public function __construct(FileMetadataPluginManager $plugin_manager, LoggerInterface $logger, ConfigFactoryInterface $config_factory, FileSystemInterface $file_system, CacheBackendInterface $cache_service) {
     $this->pluginManager = $plugin_manager;
     $this->logger = $logger;
     $this->configFactory = $config_factory;
     $this->fileSystem = $file_system;
+    $this->cache = $cache_service;
   }
 
   /**
@@ -104,6 +115,19 @@ class FileMetadataManager implements FileMetadataManagerInterface {
       $this->files[$hash] = new FileMetadata($this->pluginManager, $this->logger, $this->fileSystem, $uri, $hash);
     }
     return $this->files[$hash];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function deleteCachedMetadata($uri) {
+    if (!$hash = $this->calculateHash($uri)) {
+      return FALSE;
+    }
+    foreach (array_keys($this->pluginManager->getDefinitions()) as $id) {
+      $this->cache->delete("hash:{$id}:{$hash}");
+    }
+    return TRUE;
   }
 
   /**

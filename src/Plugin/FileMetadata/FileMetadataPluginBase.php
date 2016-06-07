@@ -331,7 +331,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * {@inheritdoc}
    */
-  public function saveMetadataToCache(array $tags = []) {
+  public function saveMetadataToCache(array $tags = [], $expire = Cache::PERMANENT) {
     if ($this->metadata === NULL) {
       $this->getMetadata();
       if ($this->metadata === NULL) {
@@ -340,7 +340,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     }
     if (!$this->readFromCache || ($this->readFromCache && $this->hasMetadataChangedFromCached)) {
       $plugin_id = $this->getPluginId();
-      $this->cache->set("hash:{$plugin_id}:{$this->hash}", $this->metadata, Cache::PERMANENT, $tags);
+      $this->cache->set("hash:{$plugin_id}:{$this->hash}", $this->metadata, $expire, $tags);
       $this->hasMetadataChangedFromCached = FALSE;
       return TRUE;
     }

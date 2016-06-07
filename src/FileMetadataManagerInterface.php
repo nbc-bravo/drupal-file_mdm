@@ -30,6 +30,17 @@ interface FileMetadataManagerInterface {
   public function uri($uri);
 
   /**
+   * Deletes the all the cached metadata for the URI.
+   *
+   * @param string $uri
+   *   The URI to a file.
+   *
+   * @return bool
+   *   TRUE if the cached metadata was removed, FALSE in case of error.
+   */
+  public function deleteCachedMetadata($uri);
+
+  /**
    * Releases the FileMetadata object for the URI.
    *
    * @param string $uri

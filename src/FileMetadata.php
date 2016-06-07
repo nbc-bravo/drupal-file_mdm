@@ -3,6 +3,7 @@
 namespace Drupal\file_mdm;
 
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file_mdm\Plugin\FileMetadataPluginManager;
 use Psr\Log\LoggerInterface;
@@ -243,9 +244,9 @@ class FileMetadata implements FileMetadataInterface {
   /**
    * {@inheritdoc}
    */
-  public function saveMetadataToCache($metadata_id, array $tags = []) {
+  public function saveMetadataToCache($metadata_id, array $tags = [], $expire = Cache::PERMANENT) {
     if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
-      return $plugin->saveMetadataToCache($tags);
+      return $plugin->saveMetadataToCache($tags, $expire);
     }
     return FALSE;
   }

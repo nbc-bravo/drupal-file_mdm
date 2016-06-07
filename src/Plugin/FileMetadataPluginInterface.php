@@ -3,6 +3,7 @@
 namespace Drupal\file_mdm\Plugin;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 
@@ -149,10 +150,13 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
    *
    * @param array $tags
    *   (optional) An array of cache tags to save to cache.
+   * @param int $expire
+   *   (optional) The cache entry expiration time. Defaults to
+   *   Cache::PERMANENT.
    *
    * @return bool
    *   TRUE if metadata was saved successfully, FALSE otherwise.
    */
-  public function saveMetadataToCache(array $tags = []);
+  public function saveMetadataToCache(array $tags = [], $expire = Cache::PERMANENT);
 
 }
