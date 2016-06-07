@@ -9,7 +9,6 @@ use Drupal\Core\Plugin\PluginBase;
 use Drupal\file_mdm\FileMetadataException;
 use Drupal\file_mdm\Plugin\FileMetadataPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 
 /**
  * Abstract implementation of a base File Metadata plugin.
@@ -111,12 +110,14 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * {@inheritdoc}
    */
-  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {  }
+  public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
+  }
 
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {  }
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+  }
 
   /**
    * {@inheritdoc}

@@ -28,7 +28,7 @@ abstract class FileMetadataManagerTestBase extends KernelTestBase {
     $supported_keys = $file_md->getSupportedKeys($metadata_id, $options);
     $count = 0;
     foreach ($supported_keys as $key) {
-      if ($entry = $file_md->getMetadata($metadata_id, $key)) {
+      if ($file_md->getMetadata($metadata_id, $key)) {
         $count++;
       }
     }

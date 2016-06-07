@@ -19,7 +19,7 @@ class GetImageSize extends FileMetadataPluginBase {
    * {@inheritdoc}
    */
   public function getSupportedKeys($options = NULL) {
-    return [0, 1, 2, 3, 'mime', 'channels', 'bits'];   
+    return [0, 1, 2, 3, 'mime', 'channels', 'bits'];
   }
 
   /**
@@ -52,7 +52,7 @@ class GetImageSize extends FileMetadataPluginBase {
     }
     return TRUE;
   }
-  
+
   /**
    * {@inheritdoc}
    */

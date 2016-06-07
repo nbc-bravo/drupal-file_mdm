@@ -5,7 +5,6 @@ namespace Drupal\file_mdm\Plugin;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\file_mdm\FileMetadataException;
 
 /**
  * Provides an interface defining a FileMetadata plugin.
@@ -15,7 +14,7 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   /**
    * Sets the URI of the file.
    *
-   * @param string $path
+   * @param string $uri
    *   A URI.
    *
    * @return $this
