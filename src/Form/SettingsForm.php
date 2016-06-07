@@ -5,6 +5,7 @@ namespace Drupal\file_mdm\Form;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\file_mdm\Plugin\FileMetadataPluginManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -15,7 +16,7 @@ class SettingsForm extends ConfigFormBase {
   /**
    * An array containing the available metadata plugins.
    *
-   * @var @todo
+   * @var \Drupal\file_mdm\Plugin\FileMetadataPluginInterface[]
    */
   protected $metadataPlugins = [];
 
@@ -24,10 +25,10 @@ class SettingsForm extends ConfigFormBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
-   * @param @todo $manager
+   * @param \Drupal\file_mdm\Plugin\FileMetadataPluginManager $manager
    *   The file metadata plugin manager.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, $manager) {
+  public function __construct(ConfigFactoryInterface $config_factory, FileMetadataPluginManager $manager) {
     parent::__construct($config_factory);
     foreach ($manager->getDefinitions() as $id => $definition) {
       $this->metadataPlugins[$id] = $manager->createInstance($id);

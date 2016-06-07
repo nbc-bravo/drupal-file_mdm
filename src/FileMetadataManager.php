@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
 /**
  * A service class to provide file metadata.
  */
-class FileMetadataManager { // @todo implements
+class FileMetadataManager implements FileMetadataManagerInterface {
 
   use StringTranslationTrait;
 
@@ -65,26 +65,36 @@ class FileMetadataManager { // @todo implements
   }
 
   /**
-   * @todo
+   * Returns an hash for the URI, used internally by the manager.
+   *
+   * @param string $uri
+   *   The URI to a file.
+   *
+   * @return string
+   *   An hash string.
    */
   protected function calculateHash($uri) {
-    // @todo error if uri is null or invalid
+    if (!file_valid_uri($uri) && !$this->fileSystem->realpath($uri)) {
+      return NULL;
+    }
     return hash('sha256', $uri);
   }
 
   /**
-   * @todo
+   * {@inheritdoc}
    */
   public function has($uri) {
     $hash = $this->calculateHash($uri);
-    return isset($this->files[$hash]);
+    return $hash ? isset($this->files[$hash]) : NULL;
   }
 
   /**
-   * @todo
+   * {@inheritdoc}
    */
   public function uri($uri) {
-    $hash = $this->calculateHash($uri);
+    if (!$hash = $this->calculateHash($uri)) {
+      return NULL;
+    }
     if (!isset($this->files[$hash])) {
       $this->files[$hash] = new FileMetadata($this->pluginManager, $this->logger, $this->fileSystem, $uri, $hash);
     }
@@ -92,10 +102,12 @@ class FileMetadataManager { // @todo implements
   }
 
   /**
-   * @todo
+   * {@inheritdoc}
    */
   public function release($uri) {
-    $hash = $this->calculateHash($uri);
+    if (!$hash = $this->calculateHash($uri)) {
+      return FALSE;
+    }
     if (isset($this->files[$hash])) {
       unset($this->files[$hash]);
       return TRUE;
@@ -104,7 +116,7 @@ class FileMetadataManager { // @todo implements
   }
 
   /**
-   * @todo
+   * {@inheritdoc}
    */
   public function count() {
     return count($this->files);
