@@ -243,9 +243,9 @@ class FileMetadata implements FileMetadataInterface {
   /**
    * {@inheritdoc}
    */
-  public function saveMetadataToCache($metadata_id) {
+  public function saveMetadataToCache($metadata_id, array $tags = []) {
     if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
-      return $plugin->saveMetadataToCache();
+      return $plugin->saveMetadataToCache($tags);
     }
     return FALSE;
   }

@@ -147,6 +147,9 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
    *
    * Uses the 'file_mdm' cache bin.
    *
+   * @param array $tags
+   *   (optional) An array of cache tags to save to cache.
+   *
    * @return bool
    *   TRUE if metadata was saved successfully, FALSE otherwise.
    */

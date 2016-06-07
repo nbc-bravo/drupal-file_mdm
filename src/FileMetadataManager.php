@@ -43,6 +43,11 @@ class FileMetadataManager implements FileMetadataManagerInterface {
    */
   protected $fileSystem;
 
+  /**
+   * The array of FileMetadata objects currently in use.
+   *
+   * @var \Drupal\file_mdm\FileMetadataInterface[]
+   */
   protected $files = [];
 
   /**

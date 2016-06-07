@@ -155,11 +155,13 @@ interface FileMetadataInterface {
    *
    * @param string $metadata_id
    *   The id of the FileMetadata plugin.
+   * @param array $tags
+   *   (optional) An array of cache tags to save to cache.
    *
    * @return bool
    *   TRUE if metadata was saved successfully, FALSE otherwise.
    */
-  public function saveMetadataToCache($metadata_id);
+  public function saveMetadataToCache($metadata_id, array $tags = []);
 
   /**
    * Saves metadata to file at URI.
