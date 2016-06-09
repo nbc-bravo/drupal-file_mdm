@@ -147,6 +147,17 @@ interface FileMetadataInterface {
   public function setMetadata($metadata_id, $key, $value);
 
   /**
+   * Checks if file metadata has been already loaded.
+   *
+   * @param string $metadata_id
+   *   The id of the FileMetadata plugin.
+   *
+   * @return bool
+   *   TRUE if metadata is loaded, FALSE otherwise.
+   */
+  public function isMetadataLoaded($metadata_id);
+
+  /**
    * Loads file metadata.
    *
    * @param string $metadata_id

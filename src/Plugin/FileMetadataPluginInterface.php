@@ -59,12 +59,21 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   public function getSupportedKeys($options = NULL);
 
   /**
+   * Checks if file metadata has been already loaded.
+   *
+   * @return bool
+   *   TRUE if metadata is loaded, FALSE otherwise.
+   */
+  public function isMetadataLoaded();
+
+  /**
    * Loads file metadata from an in-memory object/array.
    *
    * @param mixed $metadata
    *   The file metadata associated to the file at URI.
    *
-   * @return $this
+   * @return bool
+   *   TRUE if metadata was loaded successfully, FALSE otherwise.
    */
   public function loadMetadata($metadata);
 

@@ -223,10 +223,19 @@ class FileMetadata implements FileMetadataInterface {
   /**
    * {@inheritdoc}
    */
+  public function isMetadataLoaded($metadata_id) {
+    if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
+      return $plugin->isMetadataLoaded();
+    }
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function loadMetadata($metadata_id, $metadata) {
     if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
-      $plugin->loadMetadata($metadata);
-      return TRUE;
+      return $plugin->loadMetadata($metadata);
     }
     return FALSE;
   }

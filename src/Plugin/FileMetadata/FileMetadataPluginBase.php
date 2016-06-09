@@ -145,6 +145,13 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * {@inheritdoc}
    */
+  public function isMetadataLoaded() {
+    return $this->isMetadataLoaded;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function loadMetadata($metadata) {
     $this->metadata = $metadata;
     $this->hasMetadataChanged = FALSE;
@@ -157,7 +164,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     else {
       $this->isMetadataLoaded = FileMetadataInterface::LOADED_BY_CODE;
     }
-    return $this;
+    return (bool) $this->metadata;
   }
 
   /**
