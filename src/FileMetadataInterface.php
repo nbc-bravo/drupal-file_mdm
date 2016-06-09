@@ -10,6 +10,26 @@ use Drupal\Core\Cache\Cache;
 interface FileMetadataInterface {
 
   /**
+   * Metadata not loaded.
+   */
+  const NOT_LOADED = 0;
+
+  /**
+   * Metadata loaded by code.
+   */
+  const LOADED_BY_CODE = 1;
+
+  /**
+   * Metadata loaded from cache.
+   */
+  const LOADED_FROM_CACHE = 2;
+
+  /**
+   * Metadata loaded from file.
+   */
+  const LOADED_FROM_FILE = 3;
+
+  /**
    * Gets the URI of the file.
    *
    * @return string|null
