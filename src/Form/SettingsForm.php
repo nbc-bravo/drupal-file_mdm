@@ -63,15 +63,14 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // If we have more than one image toolkit, allow the user to select the one
-    // to use, and load each of the toolkits' settings form.
+    // Load subforms from each plugin.
     foreach ($this->metadataPlugins as $id => $plugin) {
       $definition = $plugin->getPluginDefinition();
       $form['file_mdm_plugin_settings'][$id] = array(
         '#type' => 'details',
         '#title' => $definition['title'],
         '#description' => $definition['help'],
-        '#open' => TRUE,
+        '#open' => FALSE,
         '#tree' => TRUE,
       );
       $form['file_mdm_plugin_settings'][$id] += $plugin->buildConfigurationForm(array(), $form_state);

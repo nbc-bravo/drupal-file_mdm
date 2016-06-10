@@ -337,7 +337,6 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     return FALSE;
   }
 
-
   /**
    * {@inheritdoc}
    */
