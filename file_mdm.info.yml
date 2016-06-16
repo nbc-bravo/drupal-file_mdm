@@ -3,3 +3,5 @@ core: 8.x
 name: 'File metadata manager'
 description: 'Provides a service to manage file metadata.'
 configure: file_mdm.settings
+test_dependencies:
+  - image_effects
