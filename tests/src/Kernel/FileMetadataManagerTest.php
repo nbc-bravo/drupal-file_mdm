@@ -2,10 +2,12 @@
 
 namespace Drupal\Tests\file_mdm\Kernel;
 
+use Drupal\file_mdm\FileMetadataInterface;
+
 /**
  * Tests that File Metadata Manager works properly.
  *
- * @group File Metadata Manager
+ * @group File Metadata
  */
 class FileMetadataManagerTest extends FileMetadataManagerTestBase {
 
@@ -15,6 +17,14 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
    * @var array
    */
   public static $modules = ['system', 'simpletest', 'file_mdm', 'file_test'];
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+    $this->installConfig(['file_mdm']);
+  }
 
   /**
    * Tests using the 'getimagesize' plugin.
@@ -108,6 +118,7 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
     // Walk through test files.
     foreach ($image_files as $image_file) {
       $file_metadata = $fmdm->uri($image_file['uri']);
+      $this->assertNotNull($file_metadata->getMetadata('getimagesize'));
       // Read from file.
       $this->assertEqual($image_file['count_keys'], $this->countMetadataKeys($file_metadata, 'getimagesize'));
       foreach ($image_file['test_keys'] as $test) {
@@ -168,20 +179,48 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
   public function testFileMetadataCaching() {
     // Prepare a copy of test files.
     file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'public://', FILE_EXISTS_REPLACE);
+    file_unmanaged_copy(drupal_get_path('module', 'simpletest') . '/files/image-test.gif', 'public://', FILE_EXISTS_REPLACE);
+    file_unmanaged_copy(drupal_get_path('module', 'simpletest') . '/files/image-test.png', 'public://', FILE_EXISTS_REPLACE);
 
     // The image files that will be tested.
     $image_files = [
       [
         // Pass a URI.
-        'uri' => 'public://test-exif.jpeg',
+        'uri' => 'public://image-test.gif',
+        'cache' => TRUE,
+        'delete' => TRUE,
+        'count_keys' => 7,
+        'test_keys' => [
+          [0, 40],
+          [1, 20],
+          [2, IMAGETYPE_GIF],
+          ['mime', 'image/gif'],
+        ],
+      ],
+      [
+        // Pass a path instead of the URI.
+        'uri' => drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg',
+        'cache' => FALSE,
+        'delete' => FALSE,
         'count_keys' => 7,
         'test_keys' => [
           [0, 100],
           [1, 75],
           [2, IMAGETYPE_JPEG],
-          ['bits', 8],
-          ['channels', 3],
           ['mime', 'image/jpeg'],
+        ],
+      ],
+      [
+        // PHP getimagesize works on remote stream wrappers.
+        'uri' => 'dummy-remote://image-test.png',
+        'cache' => TRUE,
+        'delete' => TRUE,
+        'count_keys' => 6,
+        'test_keys' => [
+          [0, 40],
+          [1, 20],
+          [2, IMAGETYPE_PNG],
+          ['mime', 'image/png'],
         ],
       ],
     ];
@@ -191,25 +230,32 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
 
     // Walk through test files.
     foreach ($image_files as $image_file) {
+      // Read from file.
       $file_metadata = $fmdm->uri($image_file['uri']);
-
-      // Cache metadata.
-      $this->assertTrue($file_metadata->saveMetadataToCache('getimagesize'));
-      $this->assertFalse($file_metadata->saveMetadataToCache('bar'));
+      $this->assertNotNull($file_metadata->getMetadata('getimagesize'));
+      $this->assertIdentical(FileMetadataInterface::LOADED_FROM_FILE, $file_metadata->isMetadataLoaded('getimagesize'));
 
       // Release URI.
       $file_metadata = NULL;
       $this->assertTrue($fmdm->release($image_file['uri']));
       $this->assertEqual(0, $fmdm->count());
 
-      // Delete file.
-      file_unmanaged_delete($image_file['uri']);
+      if ($image_file['delete']) {
+        // Delete file.
+        file_unmanaged_delete($image_file['uri']);
+        // No file to be found at URI.
+        $this->assertFalse(file_exists($image_file['uri']));
+      }
 
-      // No file to be found at URI.
-      $this->assertFalse(file_exists($image_file['uri']));
-
-      // Read from cache.
+      // Read from cache if possible.
       $file_metadata = $fmdm->uri($image_file['uri']);
+      $this->assertNotNull($file_metadata->getMetadata('getimagesize'));
+      if ($image_file['cache']) {
+        $this->assertIdentical(FileMetadataInterface::LOADED_FROM_CACHE, $file_metadata->isMetadataLoaded('getimagesize'));
+      }
+      else {
+        $this->assertIdentical(FileMetadataInterface::LOADED_FROM_FILE, $file_metadata->isMetadataLoaded('getimagesize'));
+      }
       $this->assertEqual($image_file['count_keys'], $this->countMetadataKeys($file_metadata, 'getimagesize'));
       foreach ($image_file['test_keys'] as $test) {
         $entry = $file_metadata->getMetadata('getimagesize', $test[0]);
@@ -224,17 +270,29 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
       $this->assertTrue($file_metadata->removeMetadata('getimagesize', 3));
 
       // Save again to cache.
-      $this->assertTrue($file_metadata->saveMetadataToCache('getimagesize'));
+      if ($image_file['cache']) {
+        $this->assertTrue($file_metadata->saveMetadataToCache('getimagesize'));
+      }
+      else {
+        $this->assertFalse($file_metadata->saveMetadataToCache('getimagesize'));
+      }
 
-      // Release URI.
+      if ($image_file['cache']) {
+        // Release URI.
+        $file_metadata = NULL;
+        $this->assertTrue($fmdm->release($image_file['uri']));
+        $this->assertIdentical(0, $fmdm->count());
+
+        // Read from cache.
+        $file_metadata = $fmdm->uri($image_file['uri']);
+        $this->assertIdentical($image_file['count_keys'] - 4, $this->countMetadataKeys($file_metadata, 'getimagesize'));
+        $this->assertIdentical('foo/bar', $file_metadata->getMetadata('getimagesize', 'mime'));
+        $this->assertIdentical(FileMetadataInterface::LOADED_FROM_CACHE, $file_metadata->isMetadataLoaded('getimagesize'));
+      }
+
       $file_metadata = NULL;
       $this->assertTrue($fmdm->release($image_file['uri']));
-      $this->assertIdentical(0, $fmdm->count());
-
-      // Read from cache.
-      $file_metadata = $fmdm->uri($image_file['uri']);
-      $this->assertIdentical($image_file['count_keys'] - 4, $this->countMetadataKeys($file_metadata, 'getimagesize'));
-      $this->assertIdentical('foo/bar', $file_metadata->getMetadata('getimagesize', 'mime'));
+      $this->assertEqual(0, $fmdm->count());
     }
   }
 
@@ -283,6 +341,14 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
       // Copies temp to destination URI.
       $this->assertTrue($file_metadata->copyTempToUri());
       $this->assertTrue(file_exists($image_file['uri']));
+
+      // Release URI and check metadata was cached.
+      $file_metadata = NULL;
+      $this->assertTrue($fmdm->release($image_file['uri']));
+      $this->assertEqual(0, $fmdm->count());
+      $file_metadata = $fmdm->uri($image_file['uri']);
+      $this->assertNotNull($file_metadata->getMetadata('getimagesize'));
+      $this->assertIdentical(FileMetadataInterface::LOADED_FROM_CACHE, $file_metadata->isMetadataLoaded('getimagesize'));
     }
   }
 
@@ -328,6 +394,14 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
         $entry = $file_metadata->getMetadata('getimagesize', $test[0]);
         $this->assertEqual($test[1], $entry);
       }
+
+      // Release URI and check metadata was cached.
+      $file_metadata = NULL;
+      $this->assertTrue($fmdm->release($image_file['uri']));
+      $this->assertEqual(0, $fmdm->count());
+      $file_metadata = $fmdm->uri($image_file['uri']);
+      $this->assertNotNull($file_metadata->getMetadata('getimagesize'));
+      $this->assertIdentical(FileMetadataInterface::LOADED_FROM_CACHE, $file_metadata->isMetadataLoaded('getimagesize'));
     }
   }
 

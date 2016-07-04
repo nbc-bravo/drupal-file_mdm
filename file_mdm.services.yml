@@ -14,4 +14,4 @@ services:
   plugin.manager.file_metadata:
     class: Drupal\file_mdm\Plugin\FileMetadataPluginManager
     parent: default_plugin_manager
-    arguments: ['@logger.channel.file_mdm', '@config.factory']
+    arguments: ['@config.factory']

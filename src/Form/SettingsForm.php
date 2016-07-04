@@ -63,6 +63,25 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    // Cache metadata.
+    $form['metadata_cache'] = [
+      '#type' => 'details',
+      '#open' => TRUE,
+      '#collapsible' => FALSE,
+      '#title' => $this->t('Metadata caching'),
+      '#tree' => TRUE,
+    ];
+    $form['metadata_cache']['settings'] = [
+      '#type' => 'file_mdm_caching',
+      '#default_value' => $this->config('file_mdm.settings')->get('metadata_cache'),
+    ];
+
+    // Settings tabs.
+    $form['plugins'] = array(
+      '#type' => 'vertical_tabs',
+      '#tree' => FALSE,
+    );
+
     // Load subforms from each plugin.
     foreach ($this->metadataPlugins as $id => $plugin) {
       $definition = $plugin->getPluginDefinition();
@@ -72,6 +91,7 @@ class SettingsForm extends ConfigFormBase {
         '#description' => $definition['help'],
         '#open' => FALSE,
         '#tree' => TRUE,
+        '#group' => 'plugins',
       );
       $form['file_mdm_plugin_settings'][$id] += $plugin->buildConfigurationForm(array(), $form_state);
     }
@@ -97,6 +117,14 @@ class SettingsForm extends ConfigFormBase {
     // Call the form submit handler for each of the plugins.
     foreach ($this->metadataPlugins as $plugin) {
       $plugin->submitConfigurationForm($form, $form_state);
+    }
+
+    $this->config('file_mdm.settings')->set('metadata_cache', $form_state->getValue(['metadata_cache', 'settings']));
+
+    // Only save settings if they have changed to prevent unnecessary cache
+    // invalidations.
+    if ($this->config('file_mdm.settings')->getOriginal() != $this->config('file_mdm.settings')->get()) {
+      $this->config('file_mdm.settings')->save();
     }
     parent::submitForm($form, $form_state);
   }

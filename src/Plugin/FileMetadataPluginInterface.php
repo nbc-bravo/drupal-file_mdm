@@ -13,6 +13,14 @@ use Drupal\Core\Plugin\PluginFormInterface;
 interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, PluginInspectionInterface, PluginFormInterface {
 
   /**
+   * Gets default configuration for this plugin.
+   *
+   * @return array
+   *   An associative array with the default configuration.
+   */
+  public static function defaultConfiguration();
+
+  /**
    * Sets the URI of the file.
    *
    * @param string $uri
@@ -32,6 +40,32 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
    *   The URI of the file.
    */
   public function getUri();
+
+  /**
+   * Sets the local filesystem path to the file.
+   *
+   * This is used to allow accessing local copies of files stored remotely, to
+   * minimise remote calls and allow functions that cannot access remote stream
+   * wrappers to operate locally.
+   *
+   * @param string $path
+   *   A filesystem path.
+   *
+   * @return $this
+   */
+  public function setLocalTempPath($temp_path);
+
+  /**
+   * Gets the local filesystem path to the file.
+   *
+   * This is used to allow accessing local copies of files stored remotely, to
+   * minimise remote calls and allow functions that cannot access remote stream
+   * wrappers to operate locally.
+   *
+   * @return string
+   *   The local filesystem path to the file.
+   */
+  public function getLocalTempPath();
 
   /**
    * Sets the hash used to reference the URI by the metadata manager.
@@ -159,13 +193,20 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
    *
    * @param array $tags
    *   (optional) An array of cache tags to save to cache.
-   * @param int $expire
-   *   (optional) The cache entry expiration time. Defaults to
-   *   Cache::PERMANENT.
    *
    * @return bool
    *   TRUE if metadata was saved successfully, FALSE otherwise.
    */
-  public function saveMetadataToCache(array $tags = [], $expire = Cache::PERMANENT);
+  public function saveMetadataToCache(array $tags = []);
+
+  /**
+   * Removes cached metadata for file at URI.
+   *
+   * Uses the 'file_mdm' cache bin.
+   *
+   * @return bool
+   *   TRUE if metadata was removed, FALSE otherwise.
+   */
+  public function deleteCachedMetadata();
 
 }

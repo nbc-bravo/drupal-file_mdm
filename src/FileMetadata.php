@@ -3,7 +3,6 @@
 namespace Drupal\file_mdm;
 
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\file_mdm\Plugin\FileMetadataPluginManager;
 use Psr\Log\LoggerInterface;
@@ -107,6 +106,9 @@ class FileMetadata implements FileMetadataInterface {
    */
   public function setLocalTempPath($temp_uri) {
     $this->localTempPath = $temp_uri;
+    foreach ($this->plugins as $plugin) {
+      $plugin->setLocalTempPath($this->localTempPath);
+    }
     return $this;
   }
 
@@ -142,7 +144,8 @@ class FileMetadata implements FileMetadataInterface {
     if (!isset($this->plugins[$metadata_id])) {
       try {
         $this->plugins[$metadata_id] = $this->pluginManager->createInstance($metadata_id);
-        $this->plugins[$metadata_id]->setUri($this->localTempPath ?: $this->uri);
+        $this->plugins[$metadata_id]->setUri($this->uri);
+        $this->plugins[$metadata_id]->setLocalTempPath($this->localTempPath ?: $this->uri);
         $this->plugins[$metadata_id]->setHash($this->hash);
       }
       catch (PluginNotFoundException $e) {
@@ -253,9 +256,9 @@ class FileMetadata implements FileMetadataInterface {
   /**
    * {@inheritdoc}
    */
-  public function saveMetadataToCache($metadata_id, array $tags = [], $expire = Cache::PERMANENT) {
+  public function saveMetadataToCache($metadata_id, array $tags = []) {
     if ($plugin = $this->getFileMetadataPlugin($metadata_id)) {
-      return $plugin->saveMetadataToCache($tags, $expire);
+      return $plugin->saveMetadataToCache($tags);
     }
     return FALSE;
   }

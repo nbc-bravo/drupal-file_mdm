@@ -9,7 +9,7 @@ use Drupal\file_mdm\FileMetadataException;
  *
  * @FileMetadata(
  *   id = "getimagesize",
- *   title = @Translation("PHP getimagesize metadata"),
+ *   title = @Translation("Getimagesize"),
  *   help = @Translation("File metadata plugin for PHP getimagesize()."),
  * )
  */
@@ -26,7 +26,7 @@ class GetImageSize extends FileMetadataPluginBase {
    * {@inheritdoc}
    */
   protected function doGetMetadataFromFile() {
-    if ($data = @getimagesize($this->getUri())) {
+    if ($data = @getimagesize($this->getLocalTempPath())) {
       return $data;
     }
     else {

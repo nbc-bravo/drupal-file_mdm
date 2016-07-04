@@ -124,8 +124,8 @@ class FileMetadataManager implements FileMetadataManagerInterface {
     if (!$hash = $this->calculateHash($uri)) {
       return FALSE;
     }
-    foreach (array_keys($this->pluginManager->getDefinitions()) as $id) {
-      $this->cache->delete("hash:{$id}:{$hash}");
+    foreach (array_keys($this->pluginManager->getDefinitions()) as $plugin_id) {
+      $this->cache->delete("hash:{$plugin_id}:{$hash}");
     }
     return TRUE;
   }
