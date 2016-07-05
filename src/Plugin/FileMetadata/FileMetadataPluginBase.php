@@ -508,6 +508,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     if (($cache_settings = $this->isUriFileMetadataCacheable()) === FALSE) {
       return FALSE;
     }
+    $plugin_id = $this->getPluginId();
     $this->cache->delete("hash:{$plugin_id}:{$this->hash}");
     $this->hasMetadataChangedFromCached = FALSE;
     return TRUE;
