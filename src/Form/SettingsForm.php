@@ -2,6 +2,7 @@
 
 namespace Drupal\file_mdm\Form;
 
+use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -33,6 +34,9 @@ class SettingsForm extends ConfigFormBase {
     foreach ($manager->getDefinitions() as $id => $definition) {
       $this->metadataPlugins[$id] = $manager->createInstance($id);
     }
+    uasort($this->metadataPlugins, function ($a, $b) {
+      return Unicode::strcasecmp((string) $a->getPluginDefinition()['title'], (string) $b->getPluginDefinition()['title']);
+    });
   }
 
   /**
