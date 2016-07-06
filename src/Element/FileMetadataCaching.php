@@ -2,7 +2,6 @@
 
 namespace Drupal\file_mdm\Element;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element\FormElement;
 
@@ -30,7 +29,8 @@ class FileMetadataCaching extends FormElement {
    */
   public static function valueCallback(&$element, $input, FormStateInterface $form_state) {
     if ($input !== FALSE && $input !== NULL) {
-      if (!empty($disallowed_paths = $input['disallowed_paths'])) {
+      $disallowed_paths = $input['disallowed_paths'];
+      if (!empty($disallowed_paths)) {
         $disallowed_paths = preg_replace('/\r/', '', $disallowed_paths);
         $disallowed_paths = explode("\n", $disallowed_paths);
         while (empty($disallowed_paths[count($disallowed_paths) - 1])) {

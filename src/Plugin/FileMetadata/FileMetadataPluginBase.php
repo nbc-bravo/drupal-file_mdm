@@ -505,7 +505,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function deleteCachedMetadata() {
-    if (($cache_settings = $this->isUriFileMetadataCacheable()) === FALSE) {
+    if ($this->isUriFileMetadataCacheable() === FALSE) {
       return FALSE;
     }
     $plugin_id = $this->getPluginId();

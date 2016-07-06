@@ -3,7 +3,6 @@
 namespace Drupal\file_mdm\Plugin;
 
 use Drupal\Component\Plugin\PluginInspectionInterface;
-use Drupal\Core\Cache\Cache;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 
@@ -48,7 +47,7 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
    * minimise remote calls and allow functions that cannot access remote stream
    * wrappers to operate locally.
    *
-   * @param string $path
+   * @param string $temp_path
    *   A filesystem path.
    *
    * @return $this
