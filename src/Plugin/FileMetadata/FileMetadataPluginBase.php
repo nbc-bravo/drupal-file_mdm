@@ -345,7 +345,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
 
     // URIs falling into disallowed paths are not cached.
     foreach ($settings['disallowed_paths'] as $pattern) {
-      $p = "#^". strtr(preg_quote($pattern, '#'), ['\*' => '.*', '\?' => '.']) . "$#i";
+      $p = "#^" . strtr(preg_quote($pattern, '#'), ['\*' => '.*', '\?' => '.']) . "$#i";
       if (preg_match($p, $this->getUri())) {
         return FALSE;
       }
