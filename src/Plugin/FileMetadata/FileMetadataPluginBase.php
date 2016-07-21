@@ -390,6 +390,12 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function setMetadata($key, $value) {
+    if (!$key) {
+      throw new FileMetadataException("No metadata key specified for file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
+    }
+    if (!$this->metadata) { // @todo try loading metadata if missing
+      throw new FileMetadataException("No metadata loaded for file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
+    }
     if ($this->doSetMetadata($key, $value)) {
       $this->hasMetadataChanged = TRUE;
       if ($this->isMetadataLoaded === FileMetadataInterface::LOADED_FROM_CACHE) {
