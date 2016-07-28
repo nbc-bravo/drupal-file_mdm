@@ -71,18 +71,18 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   protected $isMetadataLoaded = FileMetadataInterface::NOT_LOADED;
 
   /**
-   * Track if metadata has been changed via ::setMetadata().
+   * Track if metadata has been changed from version on file.
    *
    * @var bool
    */
-  protected $hasMetadataChanged = FALSE;
+  protected $hasMetadataChangedFromFileVersion = FALSE;
 
   /**
    * Track if file metadata on cache needs update.
    *
    * @var bool
    */
-  protected $hasMetadataChangedFromCached = FALSE;
+  protected $hasMetadataChangedFromCacheVersion = FALSE;
 
   /**
    * Constructs a FileMetadataPluginBase plugin.
@@ -253,10 +253,11 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    */
   public function loadMetadata($metadata) {
     $this->metadata = $metadata;
-    $this->hasMetadataChanged = FALSE;
+    $this->hasMetadataChangedFromFileVersion = TRUE;
+    $this->hasMetadataChangedFromCacheVersion = TRUE;
+    $this->deleteCachedMetadata();
     if ($this->metadata === NULL) {
       $this->isMetadataLoaded = FileMetadataInterface::NOT_LOADED;
-      $this->deleteCachedMetadata();
     }
     else {
       $this->isMetadataLoaded = FileMetadataInterface::LOADED_BY_CODE;
@@ -273,7 +274,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
       // File does not exists.
       throw new FileMetadataException("File at '{$this->getLocalTempPath()}' does not exist", $this->getPluginId(), __FUNCTION__);
     }
-    $this->hasMetadataChanged = FALSE;
+    $this->hasMetadataChangedFromFileVersion = FALSE;
     if (($this->metadata = $this->doGetMetadataFromFile()) === NULL) {
       $this->isMetadataLoaded = FileMetadataInterface::NOT_LOADED;
       $this->deleteCachedMetadata();
@@ -301,8 +302,8 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    */
   public function loadMetadataFromCache() {
     $plugin_id = $this->getPluginId();
-    $this->hasMetadataChanged = FALSE;
-    $this->hasMetadataChangedFromCached = FALSE;
+    $this->hasMetadataChangedFromFileVersion = FALSE;
+    $this->hasMetadataChangedFromCacheVersion = FALSE;
     if ($this->isUriFileMetadataCacheable() !== FALSE && ($cache = $this->cache->get("hash:{$plugin_id}:{$this->hash}"))) {
       $this->metadata = $cache->data;
       $this->isMetadataLoaded = FileMetadataInterface::LOADED_FROM_CACHE;
@@ -358,8 +359,11 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function getMetadata($key = NULL) {
-    if (!$this->getUri() || !$this->hash) {
-      return NULL;
+    if (!$this->getUri()) {
+      throw new FileMetadataException("No URI specified", $this->getPluginId(), __FUNCTION__);
+    }
+    if (!$this->hash) {
+      throw new FileMetadataException("No hash specified", $this->getPluginId(), __FUNCTION__);
     }
     if ($this->metadata === NULL) {
       // Metadata has not been loaded yet. Try loading it from cache first.
@@ -376,13 +380,13 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
   /**
    * Gets a metadata element.
    *
-   * @param mixed|NULL $key
+   * @param mixed|null $key
    *   A key to determine the metadata element to be returned. If NULL, the
    *   entire metadata will be returned.
    *
-   * @return mixed
+   * @return mixed|null
    *   The value of the element specified by $key. If $key is NULL, the entire
-   *   metadata.
+   *   metadata. If no metadata is available, return NULL.
    */
   abstract protected function doGetMetadata($key = NULL);
 
@@ -390,16 +394,16 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function setMetadata($key, $value) {
-    if (!$key) {
+    if ($key === NULL) {
       throw new FileMetadataException("No metadata key specified for file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
     }
-    if (!$this->metadata) { // @todo try loading metadata if missing
+    if (!$this->metadata && !$this->getMetadata()) {
       throw new FileMetadataException("No metadata loaded for file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
     }
     if ($this->doSetMetadata($key, $value)) {
-      $this->hasMetadataChanged = TRUE;
+      $this->hasMetadataChangedFromFileVersion = TRUE;
       if ($this->isMetadataLoaded === FileMetadataInterface::LOADED_FROM_CACHE) {
-        $this->hasMetadataChangedFromCached = TRUE;
+        $this->hasMetadataChangedFromCacheVersion = TRUE;
       }
       return TRUE;
     }
@@ -423,10 +427,16 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function removeMetadata($key) {
+    if ($key === NULL) {
+      throw new FileMetadataException("No metadata key specified for file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
+    }
+    if (!$this->metadata && !$this->getMetadata()) {
+      throw new FileMetadataException("No metadata loaded for file at '{$this->getUri()}'", $this->getPluginId(), __FUNCTION__);
+    }
     if ($this->doRemoveMetadata($key)) {
-      $this->hasMetadataChanged = TRUE;
+      $this->hasMetadataChangedFromFileVersion = TRUE;
       if ($this->isMetadataLoaded === FileMetadataInterface::LOADED_FROM_CACHE) {
-        $this->hasMetadataChangedFromCached = TRUE;
+        $this->hasMetadataChangedFromCacheVersion = TRUE;
       }
       return TRUE;
     }
@@ -456,12 +466,14 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    */
   public function saveMetadataToFile() {
     if (!$this->isSaveToFileSupported()) {
-      throw new FileMetadataException('Write metadata to file is not supported', $this->getPluginId());
+      throw new FileMetadataException('Write metadata to file is not supported', $this->getPluginId(), __FUNCTION__);
     }
     if ($this->metadata === NULL) {
       return FALSE;
     }
-    if ($this->hasMetadataChanged) {
+    if ($this->hasMetadataChangedFromFileVersion) {
+      // Clears cache so that next time metadata will be fetched from file.
+      $this->deleteCachedMetadata();
       return $this->doSaveMetadataToFile();
     }
     return FALSE;
@@ -487,12 +499,12 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     if (($cache_settings = $this->isUriFileMetadataCacheable()) === FALSE) {
       return FALSE;
     }
-    if ($this->isMetadataLoaded !== FileMetadataInterface::LOADED_FROM_CACHE || ($this->isMetadataLoaded === FileMetadataInterface::LOADED_FROM_CACHE && $this->hasMetadataChangedFromCached)) {
+    if ($this->isMetadataLoaded !== FileMetadataInterface::LOADED_FROM_CACHE || ($this->isMetadataLoaded === FileMetadataInterface::LOADED_FROM_CACHE && $this->hasMetadataChangedFromCacheVersion)) {
       $tags = Cache::mergeTags($tags, $this->getConfigObject()->getCacheTags());
       $tags = Cache::mergeTags($tags, $this->configFactory->get('file_mdm.settings')->getCacheTags());
       $expire = $cache_settings['expiration'] === -1 ? Cache::PERMANENT : time() + $cache_settings['expiration'];
       $this->cache->set("hash:{$this->getPluginId()}:{$this->hash}", $this->getMetadataToCache(), $expire, $tags);
-      $this->hasMetadataChangedFromCached = FALSE;
+      $this->hasMetadataChangedFromCacheVersion = FALSE;
       return TRUE;
     }
     return FALSE;
@@ -517,7 +529,7 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
     }
     $plugin_id = $this->getPluginId();
     $this->cache->delete("hash:{$plugin_id}:{$this->hash}");
-    $this->hasMetadataChangedFromCached = FALSE;
+    $this->hasMetadataChangedFromCacheVersion = FALSE;
     return TRUE;
   }
 
