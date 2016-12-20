@@ -1,5 +1,8 @@
 {
     "name": "drupal/file_mdm",
     "type": "drupal-module",
-    "description": "Provides a service to manage file metadata."
+    "description": "Provides a service to manage file metadata.",
+    "require": {
+        "phenx/php-font-lib": "0.4"
+    }
 }

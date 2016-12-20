@@ -19,14 +19,6 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
   public static $modules = ['system', 'simpletest', 'file_mdm', 'file_test'];
 
   /**
-   * {@inheritdoc}
-   */
-  public function setUp() {
-    parent::setUp();
-    $this->installConfig(['file_mdm']);
-  }
-
-  /**
    * Tests using the 'getimagesize' plugin.
    */
   public function testFileMetadata() {

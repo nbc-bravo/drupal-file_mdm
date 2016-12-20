@@ -1,0 +1,8 @@
+type: module
+core: 8.x
+name: File metadata - Font
+description: 'Provides a file metadata plugin for TTF/OTF/WOFF font information.'
+dependencies:
+  - file_mdm
+test_dependencies:
+  - image_effects

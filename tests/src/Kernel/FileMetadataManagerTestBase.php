@@ -11,6 +11,14 @@ use Drupal\KernelTests\KernelTestBase;
 abstract class FileMetadataManagerTestBase extends KernelTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+    $this->installConfig(['file_mdm']);
+  }
+
+  /**
    * Returns the count of metadata keys found in the file.
    *
    * @param \Drupal\file_mdm\FileMetadataInterface $file_md
