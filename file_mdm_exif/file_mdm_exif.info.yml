@@ -1,0 +1,7 @@
+type: module
+core: 8.x
+name: File metadata - EXIF
+description: 'Provides a file metadata plugin for EXIF image information.'
+configure: file_mdm.settings
+dependencies:
+  - file_mdm
