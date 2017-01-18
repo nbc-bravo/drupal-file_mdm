@@ -322,7 +322,7 @@ class FileMetadataExifTest extends WebTestBase {
     $supported_keys = $file_md->getSupportedKeys($metadata_id, $options);
     $count = 0;
     foreach ($supported_keys as $key) {
-      if ($file_md->getMetadata($metadata_id, $key)) {
+      if ($entry = $file_md->getMetadata($metadata_id , $key)) {
         $count++;
       }
     }

@@ -170,6 +170,7 @@ class ExifTagMapper implements ExifTagMapperInterface {
           PelIfd::INTEROPERABILITY,
         ];
         foreach ($ifd_types as $type) {
+          $ifd = new PelIfd($type);
           $this->supportedIfdsMap[] = [PelIfd::getTypeName($type), $type];
         }
         $this->setCache($cache_id, $this->supportedIfdsMap);
@@ -301,7 +302,7 @@ class ExifTagMapper implements ExifTagMapperInterface {
       else {
         $config_map = $this->configFactory->get('file_mdm_exif.file_metadata_plugin.exif')->get('ifd_map');
         $this->stringToIfdMap = [];
-        foreach ($config_map as $value) {
+        foreach ($config_map as $key => $value) {
           foreach ($value['aliases'] as $alias) {
             $k = strtolower($alias);
             $this->stringToIfdMap[$k] = $value['type'];
