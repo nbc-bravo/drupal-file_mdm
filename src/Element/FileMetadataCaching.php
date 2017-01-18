@@ -59,7 +59,7 @@ class FileMetadataCaching extends FormElement {
    * @return array
    *   The processed element.
    */
-  public static function processCaching(&$element, FormStateInterface $form_state, &$complete_form) {
+  public static function processCaching(array &$element, FormStateInterface $form_state, array &$complete_form) {
     $element['enabled'] = [
       '#type' => 'checkbox',
       '#title' => t('Cache metadata'),

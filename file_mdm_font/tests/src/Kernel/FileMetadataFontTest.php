@@ -17,7 +17,14 @@ class FileMetadataFontTest extends FileMetadataManagerTestBase {
    *
    * @var array
    */
-  public static $modules = ['system', 'simpletest', 'file_mdm', 'file_mdm_font', 'file_test', 'image_effects'];
+  public static $modules = [
+    'system',
+    'simpletest',
+    'file_mdm',
+    'file_mdm_font',
+    'file_test',
+    'image_effects',
+  ];
 
   /**
    * {@inheritdoc}
@@ -57,7 +64,7 @@ class FileMetadataFontTest extends FileMetadataManagerTestBase {
     $fmdm = $this->container->get('file_metadata_manager');
 
     // Walk through test files.
-    foreach($font_files as $font_file) {
+    foreach ($font_files as $font_file) {
       $file_metadata = $fmdm->uri($font_file['uri']);
       if (!$file_metadata) {
         $this->fail("File not found: {$font_file['uri']}");

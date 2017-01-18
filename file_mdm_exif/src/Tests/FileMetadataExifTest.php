@@ -20,7 +20,13 @@ class FileMetadataExifTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = ['system', 'simpletest', 'file_mdm', 'file_mdm_exif', 'file_test'];
+  public static $modules = [
+    'system',
+    'simpletest',
+    'file_mdm',
+    'file_mdm_exif',
+    'file_test',
+  ];
 
   /**
    * Test EXIF plugin.
@@ -106,7 +112,7 @@ class FileMetadataExifTest extends WebTestBase {
     $fmdm = $this->container->get('file_metadata_manager');
 
     // Walk through test files.
-    foreach($image_files as $image_file) {
+    foreach ($image_files as $image_file) {
       $file_metadata = $fmdm->uri($image_file['uri']);
       if (!$file_metadata) {
         $this->fail("File not found: {$image_file['uri']}");

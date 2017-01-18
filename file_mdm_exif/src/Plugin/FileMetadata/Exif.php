@@ -4,8 +4,6 @@ namespace Drupal\file_mdm_exif\Plugin\FileMetadata;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Form\FormStateInterface;
-use Drupal\file_mdm\FileMetadataException;
 use Drupal\file_mdm\Plugin\FileMetadata\FileMetadataPluginBase;
 use Drupal\file_mdm_exif\ExifTagMapperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;

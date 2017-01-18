@@ -106,7 +106,7 @@ interface FileMetadataInterface {
    *
    * @param string $metadata_id
    *   The id of the FileMetadata plugin.
-   * @param mixed|NULL $key
+   * @param mixed|null $key
    *   A key to determine the metadata element to be returned. If NULL, the
    *   entire metadata will be returned.
    *

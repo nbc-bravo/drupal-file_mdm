@@ -135,7 +135,7 @@ interface FileMetadataPluginInterface extends ContainerFactoryPluginInterface, P
   /**
    * Gets a metadata element.
    *
-   * @param mixed|NULL $key
+   * @param mixed|null $key
    *   A key to determine the metadata element to be returned. If NULL, the
    *   entire metadata will be returned.
    *

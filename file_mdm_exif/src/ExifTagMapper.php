@@ -8,7 +8,6 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\file_mdm\FileMetadataException;
 use Psr\Log\LoggerInterface;
 use lsolesen\pel\PelIfd;
-use lsolesen\pel\PelJpeg;
 use lsolesen\pel\PelTag;
 
 /**
@@ -138,7 +137,9 @@ class ExifTagMapper implements ExifTagMapperInterface {
       return $this->getSupportedIfdsMap();
     }
     elseif (isset($options['ifd'])) {
-      return array_filter($this->getSupportedKeysMap(), function ($a) use ($options) { return strtolower($options['ifd']) === strtolower($a[0]); });
+      return array_filter($this->getSupportedKeysMap(), function ($a) use ($options) {
+        return strtolower($options['ifd']) === strtolower($a[0]);
+      });
     }
     else {
       return $this->getSupportedKeysMap();
@@ -161,7 +162,14 @@ class ExifTagMapper implements ExifTagMapperInterface {
       }
       else {
         $this->supportedIfdsMap = [];
-        foreach ([PelIfd::IFD0, PelIfd::IFD1, PelIfd::EXIF, PelIfd::GPS, PelIfd::INTEROPERABILITY] as $type) {
+        $ifd_types = [
+          PelIfd::IFD0,
+          PelIfd::IFD1,
+          PelIfd::EXIF,
+          PelIfd::GPS,
+          PelIfd::INTEROPERABILITY,
+        ];
+        foreach ($ifd_types as $type) {
           $this->supportedIfdsMap[] = [PelIfd::getTypeName($type), $type];
         }
         $this->setCache($cache_id, $this->supportedIfdsMap);
@@ -190,7 +198,10 @@ class ExifTagMapper implements ExifTagMapperInterface {
           $ifd_obj = new PelIfd($ifd[1]);
           $valid_tags = $ifd_obj->getValidTags();
           foreach ($valid_tags as $tag) {
-            $this->supportedKeysMap[] = [$ifd[0], PelTag::getName($ifd[1], $tag)];
+            $this->supportedKeysMap[] = [
+              $ifd[0],
+              PelTag::getName($ifd[1], $tag),
+            ];
           }
         }
         $this->setCache($cache_id, $this->supportedKeysMap);
