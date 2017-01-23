@@ -4,6 +4,6 @@
     "description": "Provides a service to manage file metadata.",
     "require": {
         "phenx/php-font-lib": "0.4",
-        "lsolesen/pel": "0.9.4"
+        "lsolesen/pel": "master@dev"
     }
 }
