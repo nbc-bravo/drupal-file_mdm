@@ -307,10 +307,7 @@ class Exif extends FileMetadataPluginBase {
       }
     }
 
-    // @todo Note, PEL 0.9.4 does not support writing to TIFF, nor error
-    // checking while saving file. Needs upstream fixes.
-    $file->saveFile($this->getLocalTempPath());
-    return TRUE;
+    return $file->saveFile($this->getLocalTempPath()) === FALSE ? FALSE : TRUE;
   }
 
   /**

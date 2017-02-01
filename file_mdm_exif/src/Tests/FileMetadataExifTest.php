@@ -154,9 +154,9 @@ class FileMetadataExifTest extends WebTestBase {
   }
 
   /**
-   * Test writing metadata to file.
+   * Test writing metadata to JPEG file.
    */
-  public function testExifSaveToFile() {
+  public function testJpegExifSaveToFile() {
     $fmdm = $this->container->get('file_metadata_manager');
 
     // Copy test file to public://.
@@ -302,6 +302,39 @@ class FileMetadataExifTest extends WebTestBase {
     $file_metadata = $fmdm->uri($file_uri);
     $this->assertEqual(52, $this->countMetadataKeys($file_metadata, 'exif'));
     $this->assertIdentical(FileMetadataInterface::LOADED_FROM_CACHE, $file_metadata->isMetadataLoaded('exif'));
+  }
+
+  /**
+   * Test writing metadata to TIFF file.
+   */
+  public function testTiffExifSaveToFile() {
+    $fmdm = $this->container->get('file_metadata_manager');
+
+    // Copy test file to public://.
+    file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/sample-1.tiff', 'public://', FILE_EXISTS_REPLACE);
+    $file_uri = 'public://sample-1.tiff';
+    $file_metadata = $fmdm->uri($file_uri);
+
+    // Check values via exif_read_data before operations.
+    $data = @exif_read_data($file_uri);
+    $this->assertEqual(1, $data['Orientation']);
+    $this->assertEqual(2, $data['PhotometricInterpretation']);
+
+    // Change tags from IFD0.
+    $this->assertEqual(1, $file_metadata->getMetadata('exif', 'orientation')['value']);
+    $this->assertTrue($file_metadata->setMetadata('exif', 'orientation', 4));
+    $this->assertEqual(4, $file_metadata->getMetadata('exif', 'orientation')['value']);
+    $this->assertEqual(2, $file_metadata->getMetadata('exif', 'PhotometricInterpretation')['value']);
+    $this->assertTrue($file_metadata->setMetadata('exif', 'PhotometricInterpretation', 4));
+    $this->assertEqual(4, $file_metadata->getMetadata('exif', 'PhotometricInterpretation')['value']);
+
+    // Save metadata to file.
+    $this->assertTrue($file_metadata->saveMetadataToFile('exif'));
+
+    // Check results via exif_read_data.
+    $data = @exif_read_data($file_uri);
+    $this->assertEqual(4, $data['Orientation']);
+    $this->assertEqual(4, $data['PhotometricInterpretation']);
   }
 
   /**
