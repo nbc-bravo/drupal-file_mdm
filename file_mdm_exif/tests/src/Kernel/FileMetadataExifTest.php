@@ -1,9 +1,9 @@
 <?php
 
-namespace Drupal\file_mdm_exif\Tests;
+namespace Drupal\Tests\file_mdm_exif\Kernel;
 
 use Drupal\file_mdm\FileMetadataInterface;
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\file_mdm\Kernel\FileMetadataManagerTestBase;
 use lsolesen\pel\PelEntryAscii;
 use lsolesen\pel\PelEntryRational;
 use lsolesen\pel\PelEntrySRational;
@@ -13,7 +13,7 @@ use lsolesen\pel\PelEntrySRational;
  *
  * @group File Metadata
  */
-class FileMetadataExifTest extends WebTestBase {
+class FileMetadataExifTest extends FileMetadataManagerTestBase {
 
   /**
    * Modules to enable.
@@ -26,6 +26,7 @@ class FileMetadataExifTest extends WebTestBase {
     'file_mdm',
     'file_mdm_exif',
     'file_test',
+    'image_effects'
   ];
 
   /**
@@ -33,7 +34,8 @@ class FileMetadataExifTest extends WebTestBase {
    */
   public function testExifPlugin() {
     // Prepare a copy of test files.
-    $this->drupalGetTestFiles('image');
+    file_unmanaged_copy(drupal_get_path('module', 'simpletest') . '/files/image-test.jpg', 'public://', FILE_EXISTS_REPLACE);
+    file_unmanaged_copy(drupal_get_path('module', 'simpletest') . '/files/image-test.png', 'public://', FILE_EXISTS_REPLACE);
     file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'public://', FILE_EXISTS_REPLACE);
     file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', 'temporary://', FILE_EXISTS_REPLACE);
     // The image files that will be tested.
@@ -335,31 +337,6 @@ class FileMetadataExifTest extends WebTestBase {
     $data = @exif_read_data($file_uri);
     $this->assertEqual(4, $data['Orientation']);
     $this->assertEqual(4, $data['PhotometricInterpretation']);
-  }
-
-  /**
-   * Returns the count of metadata keys found in the file.
-   *
-   * @param \Drupal\file_mdm\FileMetadataInterface $file_md
-   *   The FileMetadata object.
-   * @param string $metadata_id
-   *   The file metadata plugin id.
-   * @param mixed $options
-   *   (optional) Allows specifying additional options to control the list of
-   *   metadata keys returned.
-   *
-   * @return int
-   *   The count of metadata keys found in the file.
-   */
-  protected function countMetadataKeys(FileMetadataInterface $file_md, $metadata_id, $options = NULL) {
-    $supported_keys = $file_md->getSupportedKeys($metadata_id, $options);
-    $count = 0;
-    foreach ($supported_keys as $key) {
-      if ($file_md->getMetadata($metadata_id, $key)) {
-        $count++;
-      }
-    }
-    return $count;
   }
 
 }
