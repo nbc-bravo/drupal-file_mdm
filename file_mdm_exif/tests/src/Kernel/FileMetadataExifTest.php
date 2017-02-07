@@ -26,7 +26,7 @@ class FileMetadataExifTest extends FileMetadataManagerTestBase {
     'file_mdm',
     'file_mdm_exif',
     'file_test',
-    'image_effects'
+    'image_effects',
   ];
 
   /**

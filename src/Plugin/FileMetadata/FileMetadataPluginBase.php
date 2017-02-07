@@ -187,8 +187,10 @@ abstract class FileMetadataPluginBase extends PluginBase implements FileMetadata
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+    // @codingStandardsIgnoreStart
     $this->configuration['cache']['override'] = (bool) $form_state->getValue([$this->getPluginId(), 'override']);
     $this->configuration['cache']['settings'] = $form_state->getValue([$this->getPluginId(), 'cache_details', 'settings']);
+    // @codingStandardsIgnoreEnd
 
     $config = $this->getConfigObject(TRUE);
     $config->set('configuration', $this->configuration);
