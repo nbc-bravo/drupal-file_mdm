@@ -32,7 +32,9 @@ class Font extends FileMetadataPluginBase {
    */
   protected function doGetMetadataFromFile() {
     $font = LibFont::load($this->getLocalTempPath());
-    $font->parse();
+    // @todo ::parse raises 'Undefined offset' notices in phenx/php-font-lib
+    // 0.4, suppress errors while upstream is fixed.
+    @$font->parse();
     $keys = $this->getSupportedKeys();
     $metadata = [];
     foreach ($keys as $key) {
