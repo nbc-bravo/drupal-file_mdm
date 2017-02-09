@@ -121,20 +121,20 @@ class FileMetadata implements FileMetadataInterface {
       $this->fileSystem->unlink($temp_uri);
       $temp_uri .= '.' . pathinfo($this->getUri(), PATHINFO_EXTENSION);
     }
-    if ($temp_uri = file_unmanaged_copy($this->getUri(), $temp_uri, FILE_EXISTS_REPLACE)) {
-      $this->setLocalTempPath($temp_uri);
+    if ($temp_path = file_unmanaged_copy($this->getUri(), $this->fileSystem->realpath($temp_uri), FILE_EXISTS_REPLACE)) {
+      $this->setLocalTempPath($temp_path);
     }
-    return (bool) $temp_uri;
+    return (bool) $temp_path;
   }
 
   /**
    * {@inheritdoc}
    */
   public function copyTempToUri() {
-    if (($temp_uri = $this->getLocalTempPath()) === NULL) {
+    if (($temp_path = $this->getLocalTempPath()) === NULL) {
       return FALSE;
     }
-    return (bool) file_unmanaged_copy($temp_uri, $this->getUri(), FILE_EXISTS_REPLACE);
+    return (bool) file_unmanaged_copy($temp_path, $this->getUri(), FILE_EXISTS_REPLACE);
   }
 
   /**

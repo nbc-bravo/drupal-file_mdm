@@ -378,7 +378,6 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
       // File to be found at destination URI.
       $this->assertTrue(file_exists($image_file['uri']));
       // File to be found at local temp URI.
-      $this->assertEqual('temporary', $file_system->uriScheme($file_metadata->getLocalTempPath()));
       $this->assertIdentical(0, strpos($file_system->basename($file_metadata->getLocalTempPath()), 'file_mdm_'));
       $this->assertTrue(file_exists($file_metadata->getLocalTempPath()));
       $this->assertEqual($image_file['count_keys'], $this->countMetadataKeys($file_metadata, 'getimagesize'));
