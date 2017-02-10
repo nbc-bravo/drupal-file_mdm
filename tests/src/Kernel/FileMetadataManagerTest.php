@@ -396,4 +396,29 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
     }
   }
 
+  /**
+   * Tests URI sanitization.
+   */
+  public function testSanitizedUri() {
+    // Get the file metadata manager service.
+    $fmdm = $this->container->get('file_metadata_manager');
+    $file_system = $this->container->get('file_system');
+
+    // Copy a test file to test directory.
+    $test_directory = 'public://test-images/';
+    file_prepare_directory($test_directory, FILE_CREATE_DIRECTORY);
+    file_unmanaged_copy(drupal_get_path('module', 'file_mdm') . '/tests/files/test-exif.jpeg', $test_directory, FILE_EXISTS_REPLACE);
+
+    // Get file metadata object.
+    $file_metadata = $fmdm->uri('public://test-images/test-exif.jpeg');
+    $this->assertEqual(7, $this->countMetadataKeys($file_metadata, 'getimagesize'));
+
+    // Check that the file metadata manager has the URI in different forms.
+    $this->assertTrue($fmdm->has('public://test-images/test-exif.jpeg'));
+    $this->assertTrue($fmdm->has('public:///test-images/test-exif.jpeg'));
+    $this->assertTrue($fmdm->has('public://test-images//test-exif.jpeg'));
+    $this->assertTrue($fmdm->has('public://////test-images////test-exif.jpeg'));
+    $this->assertFalse($fmdm->has('public:/test-images/test-exif.jpeg'));
+  }
+
 }

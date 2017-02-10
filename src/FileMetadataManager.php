@@ -90,9 +90,14 @@ class FileMetadataManager implements FileMetadataManagerInterface {
    *   An hash string.
    */
   protected function calculateHash($uri) {
+    // Sanitize URI removing duplicate slashes, if any.
+    // @see http://stackoverflow.com/questions/12494515/remove-unnecessary-slashes-from-path
+    $uri = preg_replace('/([^:])(\/{2,})/', '$1/', $uri);
+    // If URI is invalid and no local file path exists, return NULL.
     if (!file_valid_uri($uri) && !$this->fileSystem->realpath($uri)) {
       return NULL;
     }
+    // Return a hash of the URI.
     return hash('sha256', $uri);
   }
 
