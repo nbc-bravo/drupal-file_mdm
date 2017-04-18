@@ -77,7 +77,7 @@ class FileMetadataCaching extends FormElement {
       '#description' => t("Specify the required lifetime of cached entries. Longer times may lead to increased cache sizes."),
       '#states' => [
         'visible' => [
-          ':input[name="' . $element['#name'] . '[enabled]"]' => array('checked' => TRUE),
+          ':input[name="' . $element['#name'] . '[enabled]"]' => ['checked' => TRUE],
         ],
       ],
     ];
@@ -89,7 +89,7 @@ class FileMetadataCaching extends FormElement {
       '#description' => t("Only files prefixed by a valid URI scheme will be cached, like for example <kbd>public://</kbd>. Files in the <kbd>temporary://</kbd> scheme will never be cached. Specify here if there are any paths to be additionally <strong>excluded</strong> from caching, one per line. Use wildcard patterns when entering the path. For example, <kbd>public://styles/*</kbd>."),
       '#states' => [
         'visible' => [
-          ':input[name="' . $element['#name'] . '[enabled]"]' => array('checked' => TRUE),
+          ':input[name="' . $element['#name'] . '[enabled]"]' => ['checked' => TRUE],
         ],
       ],
     ];
