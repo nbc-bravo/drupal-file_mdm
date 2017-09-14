@@ -5,7 +5,7 @@
  * Provides a service to manage file metadata.
  */
 
-use \Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityInterface;
 
 /**
  * Implements hook_cache_flush().

@@ -6,6 +6,6 @@ package: File metadata
 configure: file_mdm.settings
 php: 5.6
 dependencies:
-  - file_mdm
+  - file_mdm:file_mdm
 test_dependencies:
-  - image_effects
+  - image_effects:image_effects

@@ -402,7 +402,6 @@ class FileMetadataManagerTest extends FileMetadataManagerTestBase {
   public function testSanitizedUri() {
     // Get the file metadata manager service.
     $fmdm = $this->container->get('file_metadata_manager');
-    $file_system = $this->container->get('file_system');
 
     // Copy a test file to test directory.
     $test_directory = 'public://test-images/';
