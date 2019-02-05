@@ -187,7 +187,6 @@ class FileMetadata implements FileMetadataInterface {
       }
     }
     catch (\Exception $e) {
-      $this->logger->error($e->getMessage());
       $metadata = NULL;
     }
     return $metadata;
